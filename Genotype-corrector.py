@@ -83,12 +83,12 @@ def parse_mapfile_infos(mapfile):
     f0.close()
     for i, j in zip(tmp_index[0:-1], tmp_index[1:]):
         indexes_list.append(str(i)+'-'+str(j))
-    print 'There are total %s samples.'%len(samples_list)
-    print 'samples_list:\n %s\n' %samples_list
-    print 'There are total %s contigs.'%len(contigs_list)
-    print 'contigs_list:\n %s\n' %contigs_list
-    print 'Caution: later confirm the location of contig in the\
-    name.Cp-AxS-S7-p160446 or s7-p0001 or ....'
+#    print 'There are total %s samples.'%len(samples_list)
+#    print 'samples_list:\n %s\n' %samples_list
+#    print 'There are total %s contigs.'%len(contigs_list)
+#    print 'contigs_list:\n %s\n' %contigs_list
+#    print 'Caution: later confirm the location of contig in the\
+#    name.Cp-AxS-S7-p160446 or s7-p0001 or ....'
 #    print 'indexes_list:\n %s' %indexes_list
 #    print 'first_line:\n %s' %first_line
     return samples_list, contigs_list, indexes_list, first_line
@@ -115,49 +115,6 @@ def parse_mapfile_seqs(mapfile, gt_zeze, gt_zeon, gt_onon):
 #    print 'loci_list:\n %s'%loci_list
     return seqs_list, loci_list
 
-'''
-def split_seq2hmt(seq, win_size, gt_miss):
-    head_base = seq[0]
-    if head_base != gt_miss:
-        h_seq = ''
-        for i in seq:
-            if i == head_base or i == gt_miss:
-                h_seq += head_base
-            else:
-                break
-    else:
-        h_seq = ''
-
-    tail_base = seq[-1]
-    reverse_seq = seq[::-1]
-    if tail_base != gt_miss:
-        t_seq = ''
-        for j in reverse_seq:
-            if j == tail_base or j == gt_miss:
-                t_seq += tail_base
-            else:
-                break
-    else:
-        t_seq = ''
-
-    if len(h_seq) < win_size:
-        pass
-    if len(h_seq) >= win_size:
-        h_seq = ''
-    if len(t_seq) < win_size:
-        pass
-    if len(t_seq) >= win_size:
-        t_seq = ''
-    if len(t_seq) == 0:
-        m_seq = seq[len(h_seq):]
-    if len(t_seq) != 0:
-        m_seq = seq[len(h_seq):][:-len(t_seq)]
-#    print h_seq
-#    print t_seq
-#    print m_seq
-    return h_seq, m_seq, t_seq
-'''
-
 def get_windows_list(m_seq, win_size, gt_zeze, gt_zeon, gt_onon):
     '''transfer the m_seq to windows list'''
     windows_list = []
@@ -169,7 +126,7 @@ def get_windows_list(m_seq, win_size, gt_zeze, gt_zeon, gt_onon):
         win_idx_st += 1
         win_idx_ed += 1
 #    print 'There are total %d windows in this contig orig_seq.'%count_windows
-    print 'windows_list:\n %s'%windows_list
+#    print 'windows_list:\n %s'%windows_list
     return windows_list
 
 def h2a_b(sequence, gt_zeze, gt_zeon, gt_onon):
@@ -281,6 +238,7 @@ Maybe set this assumption as a argument?'''
     middle_index = (win_size-1)/2
     for i in h_island_idx:
         j = [int(k) for k in i.split()]
+        print 'j: %s'%j
         orig_start = j[0] + middle_index
         orig_end = j[-1] + middle_index + 1
         print 'orig_start: %s'%orig_start
@@ -290,12 +248,13 @@ Maybe set this assumption as a argument?'''
         print 'orig_seq_h2ab:%s'%orig_seq_h2ab
         print 'orig_seq_h:%s'%orig_seq_h
         print 'length of j: %s'%len(j)
+        print 'length of orig_seq_h: %s'%len(orig_seq_h)
         if len(j) <= middle_index:
             h_changed = []
             for idx in j:
                 print 'j: %s'%j
                 score = scores_list[idx]
-                print 'score: %s'%score
+#                print 'score: %s'%score
                 if score > 1:h_changed.append(gt_zeze)
                 if score < 1:h_changed.append(gt_onon)
                 print 'orig_seq_h: %s'%orig_seq_h
@@ -307,6 +266,7 @@ Maybe set this assumption as a argument?'''
             for_test_seq = ''.join(orig_seq_h2ab.split(gt_zeon)) #remove '-'
             ele_n = len(set(for_test_seq))
             if ele_n <= 1:
+                print 'zhe ta ma ke neng me ??????'
                 h_changed = []
                 for idx in j:
                     score = scores_list[idx]
@@ -319,6 +279,103 @@ Maybe set this assumption as a argument?'''
                 pro_p = wald_wolfowitz(for_test_seq)['p'] # > 0.05 or not
                 if pro_p > 0.05: # this seq is random
                     print 'this seq is ramdom. h retained'
+#edit the edge of h island. import the edit function
+                    if len(j) >= win_size:
+                        befo_head = orig_seq[j[0]+middle_index:\
+j[0]+middle_index+middle_index]
+                        print 'befo_head: %s'%befo_head
+                        print 'length of befo_head: %s'%len(befo_head)
+                        h_diff_ls = ''
+                        h_first_element = ''
+                        for a in befo_head:
+                            if a != gt_miss and a != gt_zeon:
+                                h_first_element = a
+                                break
+                        for b in befo_head:
+                            if b == h_first_element or b == gt_miss:
+                                h_diff_ls += b
+                            else: break
+                        h_need_n = len(h_diff_ls)
+                        h_diff_n = len(set([i for i in ''.join(h_diff_ls.split(gt_miss))]))
+                        print 'h_first_element: %s'%h_first_element
+                        print 'h_need_n: %s'%h_need_n
+                        print 'h_diff_n: %s'%h_diff_n
+                        print 'h_diff_ls: %s'%h_diff_ls
+                        if h_diff_n <= 1:
+                            main_seqlist[j[0]:j[0]+h_need_n] = [i for i in h_diff_ls]
+
+                        befo_tail = orig_seq[j[-1]+middle_index:j[-1]:-1]
+                        print 'length of befo_tail: %s'%len(befo_tail)
+                        print 'befo_tail :%s'%befo_tail
+                        t_diff_ls = []
+                        t_first_element = ''
+                        for v in befo_tail:
+                            if v != gt_miss and v != gt_zeon:
+                                t_first_element = v
+                                break
+                        for y in befo_tail:
+                            if y == t_first_element or y == gt_miss:
+                                t_diff_ls.append(y)
+                            else: break
+                        t_need_n = len(t_diff_ls)
+                        t_diff_n = len(set([i for i in \
+''.join(''.join(t_diff_ls).split(gt_miss))]))
+                        print 't_first_element: %s'%t_first_element
+                        print 't_need_n: %s'%t_need_n
+                        print 't_diff_n: %s'%t_diff_n
+                        print 't_diff_ls: %s'%t_diff_ls
+                        if t_diff_n <= 1:
+                            main_seqlist[j[-1]-t_need_n+1:j[-1]+1] = [i for i in \
+t_diff_ls[::-1]]
+                    if len(j) < win_size: # bigger than middle_index
+                        correct_frame = len(j)/2
+                        befo_head = orig_seq[j[0]+correct_frame:\
+j[0]+correct_frame+correct_frame]
+                        print 'befo_head: %s'%befo_head
+                        print 'length of befo_head: %s'%len(befo_head)
+                        h_diff_ls = ''
+                        h_first_element = ''
+                        for a in befo_head:
+                            if a != gt_miss and a != gt_zeon:
+                                h_first_element = a
+                                break
+                        for b in befo_head:
+                            if b == h_first_element or b == gt_miss:
+                                h_diff_ls += b
+                            else: break
+                        h_need_n = len(h_diff_ls)
+                        h_diff_n = len(set([i for i in ''.join(h_diff_ls.split(gt_miss))]))
+                        print 'h_first_element: %s'%h_first_element
+                        print 'h_need_n: %s'%h_need_n
+                        print 'h_diff_n: %s'%h_diff_n
+                        print 'h_diff_ls: %s'%h_diff_ls
+                        if h_diff_n <= 1:
+                            main_seqlist[j[0]:j[0]+h_need_n] = [i for i in h_diff_ls]
+
+                        befo_tail = orig_seq[j[-1]+correct_frame:j[-1]:-1]
+                        print 'length of befo_tail: %s'%len(befo_tail)
+                        print 'befo_tail :%s'%befo_tail
+                        t_diff_ls = []
+                        t_first_element = ''
+                        for v in befo_tail:
+                            if v != gt_miss and v != gt_zeon:
+                                t_first_element = v
+                                break
+                        for y in befo_tail:
+                            if y == t_first_element or y == gt_miss:
+                                t_diff_ls.append(y)
+                            else: break
+                        t_need_n = len(t_diff_ls)
+                        t_diff_n = len(set([i for i in \
+''.join(''.join(t_diff_ls).split(gt_miss))]))
+                        print 't_first_element: %s'%t_first_element
+                        print 't_need_n: %s'%t_need_n
+                        print 't_diff_n: %s'%t_diff_n
+                        print 't_diff_ls: %s'%t_diff_ls
+                        if t_diff_n <= 1:
+                            main_seqlist[j[-1]-t_need_n+1:j[-1]+1] = [i for i in \
+t_diff_ls[::-1]]
+
                 if pro_p <= 0.05: # this seq is nonrandom
                     h_changed = []
                     for idx in j:
@@ -335,35 +392,20 @@ Maybe set this assumption as a argument?'''
 
 def get_h_islands_info(main_seqlist,gt_zeon,gt_zeze,gt_onon,gt_miss,scores_list):
     tmp1_main_seqlist = main_seqlist[:]
-#tmp1_main_seqlist = [h,h,a...b...b,h,h,h]
-#    head_h_container = []
-#head_h_container = [h,h]
-#    for i in range(len(main_seqlist)):
-#        if tmp1_main_seqlist[0] == gt_zeon:
-#            head_h_container.append(tmp1_main_seqlist.pop(0))
-#    tail_h_container = []
-#tail_h_container = [h,h,h]
-#    for i in range(len(main_seqlist)-len(head_h_container)):
-#        if tmp1_main_seqlist[-1] == gt_zeon:
-#            tail_h_container.append(tmp1_main_seqlist.pop())
-#   for i in range(len(head_h_container)):
-#        tmp1_main_seqlist.insert(0, gt_miss)
-#    for i in range(len(tail_h_container)):
-#        tmp1_main_seqlist.append(gt_miss)
 #tmp1_main_seqlist = [-,-,a...b...b,-,-,-]
     tmp_seq1 = ''.join(tmp1_main_seqlist)
-    print 'tmp_seq1: %s'%tmp_seq1
+#    print 'tmp_seq1: %s'%tmp_seq1
 #tmp_seq1 = '--a...b...b---'
     h_indexlist = []
     for i, j in enumerate(tmp_seq1):
         if j == gt_zeon:
             h_indexlist.append(i)
-    print 'h_indexlist: %s'%h_indexlist
+#    print 'h_indexlist: %s'%h_indexlist
     h_indexlist_next_use = h_indexlist[:]
 #if tmp_seq1 = '--aaahhhhhbhhb--', h_indexlist = [5,6,7,8,9,11,12]
     h_island_list = tmp_seq1.replace(gt_zeze,' ').replace(gt_onon,' ')\
 .replace(gt_miss,' ').split()
-    print 'h_island_list: %s'%h_island_list
+#    print 'h_island_list: %s'%h_island_list
 #h_island_list = [hhhhh, hh]'
     h_idx_island = []
     h_socre_island = []
@@ -377,9 +419,9 @@ def get_h_islands_info(main_seqlist,gt_zeon,gt_zeze,gt_onon,gt_miss,scores_list)
         h_socre_island.append(tmp_score)
         tmp_idx = ''
         tmp_score = ''
-    print 'h_idx_island: %s'%h_idx_island
+#    print 'h_idx_island: %s'%h_idx_island
 #h_idx_island = ['0\t1\t2\t3\t4\t5\t', '10\t11\t']
-    print 'h_socre_island: %s'%h_socre_island
+#    print 'h_socre_island: %s'%h_socre_island
 #h_socre_island = [each h's score joined by \t]
     return h_island_list, h_idx_island, h_socre_island
 
