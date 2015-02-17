@@ -52,9 +52,12 @@ gt_zeze, gt_onon, gt_zeon)
                 head_seq, main_seqlist, tail_seq = get_HTseq_Mseqlist(windows_list,\
 scores_list, win_size, gt_zeze, gt_zeon, gt_onon, gt_miss, error_zeze,\
 error_zeon, error_onon, po_type)
-                main_seq = get_Mseq(main_seqlist, orig_seq_no_h, orig_seq, scores_list,gt_zeze, \
+                main_seq_first = get_Mseq_correct1(main_seqlist, orig_seq_no_h, orig_seq, scores_list,gt_zeze, \
 gt_zeon, gt_onon, gt_miss, win_size)
-                final_seq = head_seq+main_seq+tail_seq
+                main_seq_second = \
+                get_Mseq_correct2(main_seq_first,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_size)
+                print 'orig_seq: %s'%orig_seq
+                final_seq = head_seq+main_seq_second+tail_seq
 
 #            if len(m_seq) < win_size:
             if len(orig_seq) < win_size:
@@ -228,11 +231,15 @@ gt_zeze, gt_zeon, gt_onon):
     else:
         print 'this tool just support RIL and F2 polulations now'
 
-def get_Mseq(main_seqlist, orig_seq_no_h, orig_seq, scores_list, gt_zeze, gt_zeon, gt_onon,\
+def get_Mseq_correct1(main_seqlist, orig_seq_no_h, orig_seq, scores_list, gt_zeze, gt_zeon, gt_onon,\
 gt_miss, win_size):
-    '''if win_size is 15, >=15 omit, <15 splited to a or b.
-I suppose that the genotype of heterozygous is always right.
-Maybe set this assumption as a argument?'''
+    '''get main_seq and do the first correct step.
+    correct case:
+    original: aaahhhhhhh
+    corrected:hhhhhhhhhh
+    or
+    orginal: hhhhhhhhaaaa
+    correct: hhhhhhhhhhhh'''
     h_island_list, h_island_idx, h_island_score = get_h_islands_info(main_seqlist,\
     gt_zeon, gt_zeze, gt_onon, gt_miss,scores_list)
     middle_index = (win_size-1)/2
@@ -385,9 +392,9 @@ t_diff_ls[::-1]]
                         if score == 1:h_changed.append(orig_seq[idx+middle_index])
                     for p, q in zip(j ,h_changed):
                         main_seqlist[p] = q
-    main_seq = ''.join(main_seqlist)
-    print 'main_seq:\n%s'%main_seq
-    return main_seq
+    main_seq_1 = ''.join(main_seqlist)
+    print 'main_seq_1:\n%s'%main_seq_1
+    return main_seq_1
 
 
 def get_h_islands_info(main_seqlist,gt_zeon,gt_zeze,gt_onon,gt_miss,scores_list):
@@ -424,6 +431,90 @@ def get_h_islands_info(main_seqlist,gt_zeon,gt_zeze,gt_onon,gt_miss,scores_list)
 #    print 'h_socre_island: %s'%h_socre_island
 #h_socre_island = [each h's score joined by \t]
     return h_island_list, h_idx_island, h_socre_island
+
+
+def get_Mseq_correct2(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_size):
+    '''get the second main seq which do the second correct step:
+    case1:
+    before:    hhhhhhhhhhh
+    corrected: aaahhhhhhhh
+    case2:
+    before:    hhhhhhhhhhh
+    corrected: hhhhhhhhaaa'''
+    h_island_ls, h_idx_island = get_h_islands_info_noscores(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss)
+    middle_index = (win_size-1)/2
+    main_seqls = [i for i in main_seq1]
+    orig_seq_truncted = orig_seq[middle_index:-middle_index]
+    for i in h_idx_island:
+        j = [int(k) for k in i.split()]
+        start_h_idx = j[0]
+        end_h_idx = j[-1]
+        if start_h_idx != 0:
+            if start_h_idx >= middle_index-1:
+                index_ls = range(len(main_seqls))[start_h_idx-middle_index:start_h_idx]
+                corrected_scope = main_seqls[start_h_idx-middle_index:start_h_idx]
+                print 'length of corrected scope: %s'%corrected_scope
+                reference_scope = orig_seq_truncted[start_h_idx-middle_index:start_h_idx]
+                print 'length of original scope: %s'%reference_scope
+                for m,n,o in zip(corrected_scope, reference_scope,index_ls):
+                    if n == gt_zeon and m != gt_zeon :
+                        main_seqls[o] = gt_zeon
+            if start_h_idx < middle_index-1:
+                index_ls = range(len(main_seqls))[:start_h_idx]
+                corrected_scope = main_seqls[:start_h_idx]
+                print 'length of corrected scope: %s'%corrected_scope
+                reference_scope = orig_seq_truncted[:start_h_idx]
+                print 'length of original scope: %s'%reference_scope
+                for m,n,o in zip(corrected_scope, reference_scope,index_ls):
+                    if n == gt_zeon and m != gt_zeon :
+                        main_seqls[o] = gt_zeon
+            if end_h_idx+middle_index <= len(main_seqls)-1:
+                index_ls = range(len(main_seqls))[end_h_idx+1:end_h_idx+1+middle_index]
+                corrected_scope = main_seqls[end_h_idx+1:end_h_idx+1+middle_index]
+                print 'length of corrected scope: %s'%corrected_scope
+                reference_scope = orig_seq_truncted[end_h_idx+1:end_h_idx+1+middle_index]
+                print 'length of original scope: %s'%reference_scope
+                for m,n,o in zip(corrected_scope, reference_scope,index_ls):
+                    if n == gt_zeon and m != gt_zeon :
+                        main_seqls[o] = gt_zeon
+            if end_h_idx+middle_index > len(main_seqls)-1:
+                index_ls = range(len(main_seqls))[end_h_idx+1:]
+                corrected_scope = main_seqls[end_h_idx+1:]
+                print 'length of corrected scope: %s'%corrected_scope
+                reference_scope = orig_seq_truncted[end_h_idx+1:]
+                print 'length of original scope: %s'%reference_scope
+                for m,n,o in zip(corrected_scope, reference_scope,index_ls):
+                    if n == gt_zeon and m != gt_zeon :
+                        main_seqls[o] = gt_zeon
+    main_seq_2 = ''.join(main_seqls)
+    print 'main_seq_2:\n%s'%main_seq_2
+    return main_seq_2
+
+def get_h_islands_info_noscores(main_seq,gt_zeon,gt_zeze,gt_onon,gt_miss):
+    print 'main_seq: %s'%main_seq
+#tmp_seq1 = '--a...b...b---'
+    h_indexlist = []
+    for i, j in enumerate(main_seq):
+        if j == gt_zeon:
+            h_indexlist.append(i)
+#    print 'h_indexlist: %s'%h_indexlist
+    h_indexlist_next_use = h_indexlist[:]
+#if tmp_seq1 = '--aaahhhhhbhhb--', h_indexlist = [5,6,7,8,9,11,12]
+    h_island_list = main_seq.replace(gt_zeze,' ').replace(gt_onon,' ')\
+.replace(gt_miss,' ').split()
+    print 'h_island_list: %s'%h_island_list
+#h_island_list = [hhhhh, hh]'
+    h_idx_island = []
+    tmp_idx = ''
+    for i in h_island_list:
+        for j in i:
+            tmp_idx += str(h_indexlist.pop(0))+'\t'
+        h_idx_island.append(tmp_idx)
+        tmp_idx = ''
+    print 'h_idx_island: %s'%h_idx_island
+#h_idx_island = ['0\t1\t2\t3\t4\t5\t', '10\t11\t']
+    return h_island_list, h_idx_island
+
 
 def compare_and_mark(orig_seq, prefinal_seq):
     '''the genotype corrected wii add a star'''
