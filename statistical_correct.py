@@ -8,20 +8,21 @@ def tongji(original,precorrect,corrected):
     f2.readline()
     f3.readline()
     samples = sm_line.split()[1:]
-    print 'this population contain total % samples: %s'%(len(samples), samples)
+    print 'this population contain total % samples: \n%s'%(len(samples), samples)
     ori_ls = map(list, zip(*[i.split()[1:] for i in f1]))
     pre_ls = map(list, zip(*[i.split()[1:] for i in f2]))
     cor_ls = map(list, zip(*[i.split()[1:] for i in f3]))
     total_bases = len(samples)*len(ori_ls[0])
-    print 'total %s bases'%total_bases
-    homo_base, hete_base = 0, 0
+    print 'total bases: %s'%total_bases
+    homo_base, hete_base, miss = 0, 0, 0
     for k in ori_ls:
         for l in k:
             if l == 'A' or l == 'B': homo_base += 1
             if l == 'X': hete_base += 1
-            if l == '-': print 'there are missing data in original file'
-    print '\t%s homozygous genotype and %s heterozygous \
-genotype'%(homo_base, hete_base)
+            if l == '-': miss += 1
+    print '\t%s (%s) homozygous genotypes'%(homo_base,homo_base/float(total_bases))
+    print '\t%s (%s) heterozygous genotypes'%(hete_base,hete_base/float(total_bases))
+    print '\t%s (%s) missing data'%(miss, miss/float(total_bases))
     homo_miss, homo_fals = 0, 0
     hete_miss, hete_fals = 0, 0
     for i, j in zip(ori_ls, pre_ls):
@@ -31,12 +32,12 @@ genotype'%(homo_base, hete_base)
                 if (m == 'A' or m == 'B') and n != '-': homo_fals += 1
                 if m == 'X' and n == '-': hete_miss += 1
                 if m == 'X' and n != '-': hete_fals += 1
-    print 'total %s genotypes needed to correct in this \
-population'%(homo_miss+homo_fals+hete_miss+hete_fals)
-    print '\tin homozygous region,there are %s genotypes needed to correct, \
-contain %s missing genotypes, %s wrong genotypes'%(homo_miss+homo_fals, homo_miss, homo_fals)
-    print '\tin heterozygous region,there are %s genotypes needed to correct, \
-contain %s missing genotypes, %s wrong genotypes'%(hete_miss+hete_fals, hete_miss, hete_fals)
+    t_need_c = homo_miss+homo_fals+hete_miss+hete_fals
+    print '%s genotypes needed to correct in this population'%(t_need_c)
+    print '%s genotypes needed to correct in homozygous region'%(homo_miss+homo_fals)
+    print '\t%s missing genotypes, %s wrong genotypes'%(homo_miss, homo_fals)
+    print '%s genotypes needed to correct in heterozygous region'%(hete_miss+hete_fals)
+    print '\t%s missing genotypes, %s wrong genotypes'%(hete_miss, hete_fals)
 
     cor_homo, cor_hete = 0, 0
     cor_w_homo, cor_w_hete = 0, 0
@@ -51,18 +52,16 @@ contain %s missing genotypes, %s wrong genotypes'%(hete_miss+hete_fals, hete_mis
                 cor_hete += 1
                 if m == o[0]:cor_r_hete += 1
                 else: cor_w_hete += 1
-    print '%s genotypes were corrected, %s right, %s wrong'\
-%(cor_homo+cor_hete,cor_r_homo+cor_r_hete,cor_w_homo+cor_w_hete)
-    print 'in homo region, %s genotypes were corrected, %s right, %s wrong'\
-%(cor_homo,cor_r_homo,cor_w_homo)
-    print 'in hetero region, %s genotypes were corrected, %s right, %s wrong'\
-%(cor_hete,cor_r_hete,cor_w_hete)
-
-
-
-
-
-
+    t_c = cor_homo+cor_hete
+    t_c_r = cor_r_homo+cor_r_hete
+    t_c_w = cor_w_homo+cor_w_hete
+    print '%s (correct rate: %s) genotypes were corrected, %s right (right rate:\
+%s), %s wrong (wrong rate: %s)'\
+%(t_c,t_c/float(t_need_c), t_c_r, t_c_r/float(t_c), t_c_w, t_c_w/float(t_c))
+    print '\t%s genotypes were corrected in homo region, %s (%s)right, %s (%s)wrong'\
+%(cor_homo,cor_r_homo,cor_r_homo/float(cor_homo),cor_w_homo,cor_w_homo/float(cor_homo))
+    print '\t%s genotypes were corrected in hete region, %s (%s)right, %s (%s)wrong'\
+%(cor_hete,cor_r_hete,cor_r_hete/float(cor_hete),cor_w_hete,cor_w_hete/float(cor_hete))
 
 if __name__ == "__main__":
     import sys
