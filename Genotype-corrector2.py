@@ -40,26 +40,29 @@ error_onon, gt_miss, win_size = parseconfigfile(configfile)
             idx_st = int(idx.split('-')[0])
             idx_ed = int(idx.split('-')[1])
             orig_seq = seq[idx_st:idx_ed] #str
-#            print '\tIts seq:\n%s'%orig_seq
-#            h_seq, m_seq, t_seq = split_seq2hmt(orig_seq, win_size, gt_miss)
-#            if len(m_seq) >= win_size:
             if len(orig_seq) >= win_size:
+#                print 'orig_seq:\n%s %s'%(orig_seq, len(orig_seq))
                 orig_seq_no_h = h2a_b(orig_seq, gt_zeze, gt_zeon, gt_onon,gt_miss)
+#                print 'orig_seq_no_h:\n%s %s'%(orig_seq_no_h,len(orig_seq_no_h))
                 windows_list = get_windows_list(orig_seq_no_h, win_size, gt_zeze,\
 gt_zeon, gt_onon)
+#                print 'windows_list:\n%s %s'%(windows_list, len(windows_list))
                 scores_list = get_scores_list(windows_list, win_size, gt_miss,\
 gt_zeze, gt_onon, gt_zeon)
-                head_seq, main_seqlist, tail_seq = get_HTseq_Mseqlist(windows_list,\
-scores_list, win_size, gt_zeze, gt_zeon, gt_onon, gt_miss, error_zeze,\
-error_zeon, error_onon, po_type)
-                main_seq_first = get_Mseq_correct1(main_seqlist, orig_seq_no_h, orig_seq, scores_list,gt_zeze, \
-gt_zeon, gt_onon, gt_miss, win_size)
-                main_seq_second = \
-                get_Mseq_correct2(main_seq_first,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_size)
-#                print 'orig_seq: %s'%orig_seq
+#                print 'scores_list:\n%s %s'%(scores_list, len(scores_list))
+                head_seq, main_seqlist, tail_seq = get_HTseq_Mseqlist\
+(orig_seq, windows_list,scores_list, win_size, gt_zeze, gt_zeon, gt_onon, gt_miss,\
+error_zeze,error_zeon, error_onon, po_type)
+#                print 'head_seq:\n%s %s'%(head_seq,len(head_seq))
+#                print 'tail_seq:\n%s %s'%(tail_seq,len(tail_seq))
+#                print 'main_seq:\n%s %s'%(''.join(main_seqlist),len(main_seqlist))
+                main_seq_first = get_Mseq_correct1(main_seqlist, orig_seq_no_h,\
+orig_seq, scores_list,gt_zeze, gt_zeon, gt_onon, gt_miss, win_size)
+#                print 'correct1_main_seq:\n%s %s'%(main_seq_first,len(main_seq_first))
+                main_seq_second = get_Mseq_correct2(main_seq_first,gt_zeon,\
+gt_zeze,gt_onon,gt_miss,orig_seq,win_size)
+#                print 'correct2_main_seq:\n%s %s'%(main_seq_second,len(main_seq_second))
                 final_seq = head_seq+main_seq_second+tail_seq
-
-#            if len(m_seq) < win_size:
             if len(orig_seq) < win_size:
                 print 'markers number of %s in % sample is too little,\
 omitting...'%(ctg,sam)
@@ -133,20 +136,6 @@ def get_windows_list(m_seq, win_size, gt_zeze, gt_zeon, gt_onon):
 #    print 'There are total %d windows in this contig orig_seq.'%count_windows
 #    print 'windows_list:\n %s'%windows_list
     return windows_list
-'''
-def h2a_b(sequence, gt_zeze, gt_zeon, gt_onon):
-    new_seq = ''
-    for i,j in enumerate(sequence):
-        if i == gt_zeon:
-            num = stats.binom(1, 0.5).rvs()
-            if num == 1: new_base = gt_zeze
-            if num == 0: new_base = gt_onon
-        else:
-            new_base = i
-        new_seq += new_base
-#    print 'old seq: %s'%sequence
-#    print 'new seq: %s'%new_seq
-    return new_seq'''
 
 def h2a_b(sequence, gt_zeze, gt_zeon, gt_onon,gt_miss):
     miss_info = []
@@ -192,30 +181,65 @@ def get_scores_list(windows_list, win_size, gt_miss, gt_zeze, gt_onon, gt_zeon):
 #    print 'scores_list:\n %s'%scores_list
     return scores_list
 
-def get_HTseq_Mseqlist(windows_list, scores_list, win_size, gt_zeze,
+def get_HTseq_Mseqlist(orig_seq,windows_list, scores_list, win_size, gt_zeze,
 gt_zeon,gt_onon,gt_miss,error_zeze, error_zeon, error_onon, po_type):
     '''H, T, M means head, tail, main'''
     middle_index = (win_size-1)/2
     miss_count_cutoff = (win_size+1)/2
+    main_orig_seq = orig_seq[middle_index:-middle_index]
+#    print 'main_orig_seq:\n%s %s'%(main_orig_seq,len(main_orig_seq))
     main_seq_ls = []
-    for w, s in zip(windows_list, scores_list):
+    index_ls = range(len(windows_list))
+    for w, s, x in zip(windows_list, scores_list, index_ls):
         b_count = w.count(gt_onon)
         ab_length = win_size - w.count(gt_miss)
 #b_count, ab_length are used in binormal calculate, see the next function
-        if s == '-': representive_base = w[middle_index]
+        if s == '-': representive_base = main_orig_seq[x]
         if s != '-': representive_base = get_expected_pro(b_count, ab_length,\
 error_zeze, error_zeon, error_onon, po_type, gt_zeze, gt_zeon, gt_onon)
         main_seq_ls.append(representive_base) #list
-    first_window = windows_list[0]
-    last_window = windows_list[-1]
-    if first_window.count(gt_miss) >= miss_count_cutoff:
-        head_seq = first_window[0:middle_index]
-    if last_window.count(gt_miss) >= miss_count_cutoff:
-        tail_seq = last_window[middle_index+1:]
-    if first_window.count(gt_miss) < miss_count_cutoff:
-        head_seq = main_seq_ls[0]*middle_index
-    if last_window.count(gt_miss) < miss_count_cutoff:
-        tail_seq = main_seq_ls[-1]*middle_index
+    first_middle = orig_seq[0:middle_index]
+    last_middle = orig_seq[-middle_index:]
+    if main_seq_ls[0] == gt_miss:
+        head_seq = first_middle
+    if main_seq_ls[0] == gt_zeze:
+        if set(first_middle)==set([gt_zeze]) or set(first_middle)==set([gt_zeze,gt_miss]):
+            head_seq = gt_zeze*middle_index
+        else:
+            head_seq = first_middle
+    if main_seq_ls[0] == gt_onon:
+        if set(first_middle)==set([gt_onon]) or set(first_middle)==set([gt_onon,gt_miss]):
+            head_seq = gt_onon*middle_index
+        else:
+            head_seq = first_middle
+    if main_seq_ls[0] == gt_zeon:
+        if (set(first_middle)==set([gt_onon]) or
+            set(first_middle)==set([gt_zeze]) or
+            set(first_middle)==set([gt_zeze,gt_miss]) or
+            set(first_middle)==set([gt_onon,gt_miss])):
+            head_seq = first_middle
+        else:
+            head_seq = gt_zeon*middle_index
+    if main_seq_ls[-1] == gt_miss:
+        tail_seq = last_middle
+    if main_seq_ls[-1] == gt_onon:
+        if set(last_middle)==set([gt_onon]) or set(last_middle)==set([gt_onon,gt_miss]):
+            tail_seq = gt_onon*middle_index
+        else:
+            tail_seq = last_middle
+    if main_seq_ls[-1] == gt_zeze:
+        if set(last_middle)==set([gt_zeze]) or set(last_middle)==set([gt_zeze,gt_miss]):
+            tail_seq = gt_zeze*middle_index
+        else:
+            tail_seq = last_middle
+    if main_seq_ls[-1] == gt_zeon:
+        if (set(last_middle)==set([gt_onon]) or
+            set(last_middle)==set([gt_zeze]) or
+            set(last_middle)==set([gt_zeze,gt_miss]) or
+            set(last_middle)==set([gt_onon,gt_miss])):
+            tail_seq = last_middle
+        else:
+            tail_seq = gt_zeon*middle_index
 #    print 'main_seq:\n %s'%main_seq
 #    print 'head_seq:\n %s'%head_seq
 #    print 'tail_seq:\n %s'%tail_seq
@@ -226,23 +250,10 @@ gt_zeze, gt_zeon, gt_onon):
     '''given the SNP error rates  of three genotypes, a_error, b_error, h_error,
     and the proportions of three genotypes in population.calculate the genotype
     which represent the sliding window'''
-    if po_type == 'RIL':
-#        print b_count,ab_length,a_error,h_error,b_error,po_type,gt_zeze,gt_zeon
-        a_ex_prob = stats.binom.pmf(b_count, ab_length, a_error)*49.98
-        h_ex_prob = stats.binom.pmf(b_count, ab_length, 0.5+h_error/2)*0.05
-        b_ex_prob = stats.binom.pmf(b_count, ab_length, 1-b_error)*49.98
-        if a_ex_prob == max(a_ex_prob, h_ex_prob, b_ex_prob):
-            Genotype = gt_zeze
-        if h_ex_prob == max(a_ex_prob, h_ex_prob, b_ex_prob):
-            Genotype = gt_zeon
-        if b_ex_prob == max(a_ex_prob, h_ex_prob, b_ex_prob):
-            Genotype = gt_onon
-#        print Genotype
-        return Genotype
-    elif po_type == 'F2':
-        a_ex_prob = stats.binom.pmf(b_count, ab_length, a_error)*25
-        h_ex_prob = stats.binom.pmf(b_count, ab_length, 0.5+h_error/2)*50
-        b_ex_prob = stats.binom.pmf(b_count, ab_length, 1-b_error)*25
+    if po_type == 'RIL' or po_type == 'F2' :
+        a_ex_prob = stats.binom.pmf(b_count, ab_length, a_error)
+        h_ex_prob = stats.binom.pmf(b_count, ab_length, 0.5+h_error/2)
+        b_ex_prob = stats.binom.pmf(b_count, ab_length, 1-b_error)
         if a_ex_prob == max(a_ex_prob, h_ex_prob, b_ex_prob):
             Genotype = gt_zeze
         if h_ex_prob == max(a_ex_prob, h_ex_prob, b_ex_prob):
@@ -279,7 +290,8 @@ gt_zeze, gt_zeon, gt_onon,gt_miss, win_size):
 #        print 'orig_seq_h:%s'%orig_seq_h
 #        print 'length of j: %s'%len(j)
 #        print 'length of orig_seq_h: %s'%len(orig_seq_h)
-        if not jud_inc_deg(n):
+        no_miss = n.replace(gt_miss+'\t','')
+        if not jud_inc_deg(no_miss):
             h_changed = []
             for idx in j:
 #                print 'j: %s'%j
@@ -427,6 +439,8 @@ def get_h_islands_info(main_seqlist,gt_zeon,gt_zeze,gt_onon,gt_miss,scores_list)
 #h_idx_island = ['0\t1\t2\t3\t4\t5\t', '10\t11\t']
 #    print 'h_socre_island: %s'%h_socre_island
 #h_socre_island = [each h's score joined by \t]
+#may be contain - in h_socre_island, because some h's score is -,but in the
+#original seq is h. see the 12th line of function 'get_HTseq_Mseqlist'
     return h_island_list, h_idx_island, h_socre_island
 
 def jud_inc_deg(h_socres):
@@ -463,10 +477,10 @@ def get_Mseq_correct2(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_siz
     middle_index = (win_size-1)/2
     main_seqls = [i for i in main_seq1]
     orig_seq_truncted = orig_seq[middle_index:-middle_index]
-    print 'main_seqls:\n %s %s'%(''.join(main_seqls), len(main_seqls))
-    print 'orig_seq_truncted:\n %s %s'%(orig_seq_truncted, len(orig_seq_truncted))
-    print 'h_island_ls:\n %s'%h_island_ls
-    print 'h_idx_island:\n %s'%h_idx_island
+#    print 'main_seqls:\n %s %s'%(''.join(main_seqls), len(main_seqls))
+#    print 'orig_seq_truncted:\n %s %s'%(orig_seq_truncted, len(orig_seq_truncted))
+#    print 'h_island_ls:\n %s'%h_island_ls
+#    print 'h_idx_island:\n %s'%h_idx_island
     for i in h_idx_island:
         j = [int(k) for k in i.split()]
         start_h_idx = j[0]
@@ -492,13 +506,10 @@ def get_Mseq_correct2(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_siz
         if end_h_idx+middle_index <= len(main_seqls)-1:
             index_ls = range(len(main_seqls))[end_h_idx+1:end_h_idx+1+middle_index]
             corrected_scope = main_seqls[end_h_idx+1:end_h_idx+1+middle_index]
-            print 'length of corrected scope: %s'%corrected_scope
             reference_scope = orig_seq_truncted[end_h_idx+1:end_h_idx+1+middle_index]
-            print 'length of original scope: %s'%reference_scope
             for m,n,o in zip(corrected_scope, reference_scope,index_ls):
                 if n == gt_zeon and m != gt_zeon :
                     main_seqls[o] = gt_zeon
-            print main_seqls
         if end_h_idx+middle_index > len(main_seqls)-1:
             index_ls = range(len(main_seqls))[end_h_idx+1:]
             corrected_scope = main_seqls[end_h_idx+1:]
