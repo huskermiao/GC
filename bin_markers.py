@@ -75,4 +75,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 4:
         bin_makers(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
-        print 'usage:\npython bin_markers.py map_file min_interval'
+        print 'usage:\npython bin_markers.py map_file min_interval output_file'
