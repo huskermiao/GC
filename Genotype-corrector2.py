@@ -453,7 +453,6 @@ def jud_inc_deg(h_socres):
         if i > 0: bigger_zero += 1
         if i < 0: smaller_zero += 1
         if i == 0: equal_zero += 1
-#    print bigger_zero,smaller_zero,equal_zero
     if smaller_zero != 0 and bigger_zero != 0:
         return True
     else:
@@ -576,7 +575,6 @@ def output_for_normal(mapfile, configfile, outputfile):
         gpline = '\t'.join(gp)+'\n'
         f0.write(loc+'\t'+gpline)
     f0.close()
-
     f1 = open(outputfile+'.MSTMap', 'w')
     info = 'population_type <para1>\npopulation_name <para2>\n\
 distance_function <para3>\ncut_off_p_value <para4>\n\
@@ -592,7 +590,6 @@ number_of_loci <para11>\nnumber_of_individual <para12>\n\n'
     f1.close()
     print '\nThe file for MSTMap has been generated.\n\
 If you use MSTMap to construct genetic map, please add your own MSTMap parameters in the file.'
-
     f2 = open(outputfile+'.joinmap', 'w')
     fir_ls = first_line.split()
     new_firline = fir_ls[0]+'\t'+'Classification\t'+'\t'.join(fir_ls[1:])+'\n'
@@ -605,7 +602,6 @@ If you use MSTMap to construct genetic map, please add your own MSTMap parameter
     f2.close()
     print '\nThe file for Joinmap has been generated.\n\
 If you use joinmap to construct genetic map, please loading to Joinmap by copying and pasting from Excel.'
-
     f3 = open(outputfile+'.rqtl.csv','w')
     new_firstline = 'id,'+','.join(loci_ls)+'\n'
     second_line = ',1'*lines+'\n'
