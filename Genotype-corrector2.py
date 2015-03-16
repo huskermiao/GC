@@ -21,7 +21,7 @@ optparser.add_option('-C', '--config', dest = 'configfile',
 options, args = optparser.parse_args()
 
 
-def main(mapfile, outputfile, configfile):
+def main(mapfile, configfile):
     '''the mapfile can not contain any blank line
     win_size is int, >= will tackle, < not tackle'''
 
@@ -64,13 +64,13 @@ gt_zeze,gt_onon,gt_miss,orig_seq,win_size)
 #                print 'correct2_main_seq:\n%s %s'%(main_seq_second,len(main_seq_second))
                 final_seq = head_seq+main_seq_second+tail_seq
             if len(orig_seq) < win_size:
-                print 'markers number of %s in % sample is too little,\
-omitting...'%(ctg,sam)
+#                print 'markers number of %s in % sample is too little,\
+#omitting...'%(ctg,sam)
                 final_seq = orig_seq
-            final_seq_ls = compare_and_mark(orig_seq, final_seq)
-            each_sm_seq_ls.extend(final_seq_ls)
+            each_sm_seq_ls.extend(list(final_seq))
         final_list_need_reverse.append(each_sm_seq_ls)
-        write2file(final_list_need_reverse, outputfile, first_line, loci_ls)
+    return final_list_need_reverse, seqs_ls, first_line,\
+    loci_ls,gt_zeze,gt_zeon,gt_onon
 
 def parse_mapfile_infos(mapfile):
     '''parse mapfile then return: samples list, contigs list, indexes list,
@@ -556,14 +556,87 @@ def compare_and_mark(orig_seq, prefinal_seq):
 #    print 'final_seq_ls:\n%s'%final_seq_ls
     return final_seq_ls
 
-def write2file(need_reverse_ls, outputfile, first_line, loci_ls):
-    reversed_ls = map(list, zip(*need_reverse_ls))
+def output_for_check(mapfile, configfile, outputfile):
+    '''the result contain star  so you can check the results'''
+    corrected_ls, orig_ls, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    final_seq_list = []
+    for cor, ori in zip(corrected_ls, orig_ls):
+        new_ls = compare_and_mark(ori, cor)
+        final_seq_list.append(new_ls)
+    reversed_ls = map(list, zip(*final_seq_list))
     f0 = open(outputfile, 'w')
     f0.write(first_line)
     for loc, gp in zip(loci_ls, reversed_ls):
         gpline = '\t'.join(gp)+'\n'
         f0.write(loc+'\t'+gpline)
     f0.close()
+
+def output_for_normal(mapfile, configfile, outputfile):
+    '''the result not contain star...'''
+    corrected_ls, useless, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    reversed_ls = map(list, zip(*corrected_ls))
+    f0 = open(outputfile, 'w')
+    f0.write(first_line)
+    for loc, gp in zip(loci_ls, reversed_ls):
+        gpline = '\t'.join(gp)+'\n'
+        f0.write(loc+'\t'+gpline)
+    f0.close()
+
+def output_for_MSTMap(mapfile, configfile, outputfile):
+    '''the result for MSTMap...'''
+    corrected_ls, useless, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    reversed_ls = map(list, zip(*corrected_ls))
+    f0 = open(outputfile, 'w')
+    info = 'population_type <para1>\npopulation_name <para2>\n\
+distance_function <para3>\ncut_off_p_value <para4>\n\
+no_map_dist <para5>\nno_map_size <para6>\n\
+missing_threshold <para7>\nestimation_before_clustering <para8>\n\
+detect_bad_data <para9>\nobjective_function <para10>\n\
+number_of_loci <para11>\nnumber_of_individual <para12>\n\n'
+    f0.write(info)
+    f0.write(first_line)
+    for loc, gp in zip(loci_ls, reversed_ls):
+        gpline = '\t'.join(gp)+'\n'
+        f0.write(loc+'\t'+gpline)
+    f0.close()
+    print '\nThe file for MSTMap has been generated.\n\
+Please add your own MSTMap parameters in the file.'
+
+def output_for_joinmap(mapfile, configfile, outputfile):
+    '''the result for joinmap...'''
+    corrected_ls, useless, first_line, loci_ls, gt_zeze,gt_zeon,gt_onon = main(mapfile,configfile)
+    reversed_ls = map(list, zip(*corrected_ls))
+    f0 = open(outputfile, 'w')
+    fir_ls = first_line.split()
+    new_firline = fir_ls[0]+'\t'+'Classification\t'+'\t'.join(fir_ls[1:])+'\n'
+    f0.write(new_firline)
+    lines = len(loci_ls)
+    second_column = ['(%s,%s,%s)'%(gt_zeze,gt_zeon,gt_onon)]*lines
+    for loc, cl, gp in zip(loci_ls, second_column, reversed_ls):
+        gpline = '\t'.join(gp)+'\n'
+        f0.write(loc+'\t'+cl+'\t'+gpline)
+    f0.close()
+    print '\nThe file for Joinmap has been generated.\n\
+Please loading to Joinmap by copying and pasting from Excel.'
+
+def output_for_Rqtl(mapfile, configfile, outputfile):
+    '''the result for R/qtl.If your result file not ends with csv,
+    the software will add it automatically'''
+    if outputfile.endswith('.csv'):pass
+    else: outputfile += '.csv'
+    f0 = open(outputfile,'w')
+    corrected_ls, useless, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    new_firstline = 'id,'+','.join(loci_ls)+'\n'
+    second_line = ',1'*len(loci_ls)+'\n'
+    f0.write(new_firstline)
+    f0.write(second_line)
+    first_column = first_line.split()[1:]
+    for id, gp in zip(first_column, corrected_ls):
+        gpline = ','.join(gp)+'\n'
+        f0.write(id+','+gpline)
+    f0.close()
+    print '\nThe csv file for R/qtl has been generated.'
+
 
 def parseconfigfile(configfile):
     f = open(configfile)
@@ -601,4 +674,4 @@ if __name__ == "__main__":
     I = options.inputfile
     O = options.outputfile
     C = options.configfile
-    main(I, O, C)
+    output_for_Rqtl(I, C, O)
