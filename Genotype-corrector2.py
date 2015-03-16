@@ -13,7 +13,7 @@ optparser.add_option('-m', '--genotype-matrix', dest = 'matrix_filename',
                      help = 'use this genotype matrix file as input')
 optparser.add_option('-c', '--configuration', dest = 'conf_filename',
                      help = 'loading parameters from this configuration file')
-optparser.add_option('-o', '--output', dest = 'output_file',
+optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'write the corrected results to this file')
 optparser.add_option('-t', '--test', action = 'store_true', dest = 'for_test',
                      help = 'run the software under test')
