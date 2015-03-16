@@ -3,28 +3,26 @@
 
 from scipy import stats
 from optparse import OptionParser
-from skidmarks import wald_wolfowitz
 
-msg_usage = 'usage: %prog [-I] input your map file [-O] output file name [-C] config file'
-descr = '''Correct SNPs as genetic markers used for constructing genetic map...
-Before correcting, remove those markers whose distance is less than the read
-length, which ensure the random of h to a,b process.
-Write a script to solve this problem.'''
+msg_usage = 'python %prog [options]'
+
+descr = '''Improved genotype calls for genetic mapping.'''
 
 optparser = OptionParser(usage = msg_usage, description = descr)
-optparser.add_option('-I', '--input', dest = 'inputfile',
-                     help = 'Input your file need to tackle')
-optparser.add_option('-O', '--output', dest = 'outputfile',
-                     help = 'Your output file name')
-optparser.add_option('-C', '--config', dest = 'configfile',
-                     help = 'Your configuration file name')
+optparser.add_option('-m', '--genotype-matrix', dest = 'matrix_filename',
+                     help = 'use this genotype matrix file as input')
+optparser.add_option('-c', '--configuration', dest = 'conf_filename',
+                     help = 'loading parameters from this configuration file')
+optparser.add_option('-o', '--output', dest = 'output_file',
+                     help = 'write the corrected results to this file')
+optparser.add_option('-t', '--test', action = 'store_true', dest = 'for_test',
+                     help = 'run the software under test')
 options, args = optparser.parse_args()
 
 
 def main(mapfile, configfile):
     '''the mapfile can not contain any blank line
     win_size is int, >= will tackle, < not tackle'''
-
     po_type, gt_zeze, error_zeze, gt_zeon, error_zeon, gt_onon,\
 error_onon, gt_miss, win_size = parseconfigfile(configfile)
 
@@ -91,14 +89,10 @@ def parse_mapfile_infos(mapfile):
     f0.close()
     for i, j in zip(tmp_index[0:-1], tmp_index[1:]):
         indexes_list.append(str(i)+'-'+str(j))
-    print 'There are total %s samples.'%len(samples_list)
-    print 'samples_list:\n %s\n' %samples_list
-    print 'There are total %s contigs.'%len(contigs_list)
-    print 'contigs_list:\n %s\n' %contigs_list
-#    print 'Caution: later confirm the location of contig in the\
-#    name.Cp-AxS-S7-p160446 or s7-p0001 or ....'
-#    print 'indexes_list:\n %s' %indexes_list
-#    print 'first_line:\n %s' %first_line
+    print 'There are total %s samples:\n\t%s\n'\
+%(len(samples_list),','.join(samples_list))
+    print 'There are total %s contigs:\n\t%s\n'\
+%(len(contigs_list),','.join(contigs_list))
     return samples_list, contigs_list, indexes_list, first_line
 
 def parse_mapfile_seqs(mapfile, gt_zeze, gt_zeon, gt_onon):
@@ -546,7 +540,6 @@ def get_h_islands_info_noscores(main_seq,gt_zeon,gt_zeze,gt_onon,gt_miss):
 #h_idx_island = ['0\t1\t2\t3\t4\t5\t', '10\t11\t']
     return h_island_list, h_idx_island
 
-
 def compare_and_mark(orig_seq, prefinal_seq):
     '''the genotype corrected wii add a star'''
     final_seq_ls = []
@@ -570,10 +563,12 @@ def output_for_check(mapfile, configfile, outputfile):
         gpline = '\t'.join(gp)+'\n'
         f0.write(loc+'\t'+gpline)
     f0.close()
+    print "All the samples have been corrected, please check the output file \
+'%s'."%outputfile
 
 def output_for_normal(mapfile, configfile, outputfile):
     '''the result not contain star...'''
-    corrected_ls, useless, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    corrected_ls, useless, first_line, loci_ls, gt_zeze,gt_zeon,gt_onon = main(mapfile,configfile)
     reversed_ls = map(list, zip(*corrected_ls))
     f0 = open(outputfile, 'w')
     f0.write(first_line)
@@ -582,64 +577,49 @@ def output_for_normal(mapfile, configfile, outputfile):
         f0.write(loc+'\t'+gpline)
     f0.close()
 
-def output_for_MSTMap(mapfile, configfile, outputfile):
-    '''the result for MSTMap...'''
-    corrected_ls, useless, first_line, loci_ls = main(mapfile,configfile)[0:4]
-    reversed_ls = map(list, zip(*corrected_ls))
-    f0 = open(outputfile, 'w')
+    f1 = open(outputfile+'.MSTMap', 'w')
     info = 'population_type <para1>\npopulation_name <para2>\n\
 distance_function <para3>\ncut_off_p_value <para4>\n\
 no_map_dist <para5>\nno_map_size <para6>\n\
 missing_threshold <para7>\nestimation_before_clustering <para8>\n\
 detect_bad_data <para9>\nobjective_function <para10>\n\
 number_of_loci <para11>\nnumber_of_individual <para12>\n\n'
-    f0.write(info)
-    f0.write(first_line)
+    f1.write(info)
+    f1.write(first_line)
     for loc, gp in zip(loci_ls, reversed_ls):
         gpline = '\t'.join(gp)+'\n'
-        f0.write(loc+'\t'+gpline)
-    f0.close()
+        f1.write(loc+'\t'+gpline)
+    f1.close()
     print '\nThe file for MSTMap has been generated.\n\
-Please add your own MSTMap parameters in the file.'
+If you use MSTMap to construct genetic map, please add your own MSTMap parameters in the file.'
 
-def output_for_joinmap(mapfile, configfile, outputfile):
-    '''the result for joinmap...'''
-    corrected_ls, useless, first_line, loci_ls, gt_zeze,gt_zeon,gt_onon = main(mapfile,configfile)
-    reversed_ls = map(list, zip(*corrected_ls))
-    f0 = open(outputfile, 'w')
+    f2 = open(outputfile+'.joinmap', 'w')
     fir_ls = first_line.split()
     new_firline = fir_ls[0]+'\t'+'Classification\t'+'\t'.join(fir_ls[1:])+'\n'
-    f0.write(new_firline)
+    f2.write(new_firline)
     lines = len(loci_ls)
     second_column = ['(%s,%s,%s)'%(gt_zeze,gt_zeon,gt_onon)]*lines
     for loc, cl, gp in zip(loci_ls, second_column, reversed_ls):
         gpline = '\t'.join(gp)+'\n'
-        f0.write(loc+'\t'+cl+'\t'+gpline)
-    f0.close()
+        f2.write(loc+'\t'+cl+'\t'+gpline)
+    f2.close()
     print '\nThe file for Joinmap has been generated.\n\
-Please loading to Joinmap by copying and pasting from Excel.'
+If you use joinmap to construct genetic map, please loading to Joinmap by copying and pasting from Excel.'
 
-def output_for_Rqtl(mapfile, configfile, outputfile):
-    '''the result for R/qtl.If your result file not ends with csv,
-    the software will add it automatically'''
-    if outputfile.endswith('.csv'):pass
-    else: outputfile += '.csv'
-    f0 = open(outputfile,'w')
-    corrected_ls, useless, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    f3 = open(outputfile+'.rqtl.csv','w')
     new_firstline = 'id,'+','.join(loci_ls)+'\n'
-    second_line = ',1'*len(loci_ls)+'\n'
-    f0.write(new_firstline)
-    f0.write(second_line)
+    second_line = ',1'*lines+'\n'
+    f3.write(new_firstline)
+    f3.write(second_line)
     first_column = first_line.split()[1:]
     for id, gp in zip(first_column, corrected_ls):
         gpline = ','.join(gp)+'\n'
-        f0.write(id+','+gpline)
-    f0.close()
+        f3.write(id+','+gpline)
+    f3.close()
     print '\nThe csv file for R/qtl has been generated.'
 
-
-def parseconfigfile(configfile):
-    f = open(configfile)
+def parseconfigfile(config_file):
+    f = open(config_file)
     namedict = {}
     for i in f:
         if i.startswith('#'):pass
@@ -647,7 +627,7 @@ def parseconfigfile(configfile):
             if i.split(): #judge is blank line or not
                 j = i.strip().split(':')
                 namedict[j[0].strip()]=j[1].strip()
-    print 'Your parameters in configuration file:\n'
+    print 'Your parameters in configuration file:'
     print '\tPopulation type: %s'%namedict['Population_type']
     print '\tLetter for 0/0: %s'%namedict['Letter_for_0/0']
     print '\tLetter for 0/1: %s'%namedict['Letter_for_0/1']
@@ -664,14 +644,18 @@ def parseconfigfile(configfile):
     print '\tSNP error rate for 0/1: %s'%error_zeon
     gt_onon = namedict['Letter_for_1/1']
     error_onon = namedict['error_rate_for_1/1']
-    print '\tSNP error rate for 1/1: %s'%error_onon
+    print '\tSNP error rate for 1/1: %s\n'%error_onon
     gt_miss = namedict['Character_for_missing_data']
     win_size = namedict['Sliding_window_size']
     return po_type, gt_zeze, float(error_zeze), gt_zeon, float(error_zeon), gt_onon,\
 float(error_onon), gt_miss, int(win_size)
 
 if __name__ == "__main__":
-    I = options.inputfile
-    O = options.outputfile
-    C = options.configfile
-    output_for_Rqtl(I, C, O)
+    I = options.matrix_filename
+    C = options.conf_filename
+    O = options.output_file
+    T = options.for_test
+    if T:
+        output_for_check(I, C, O)
+    else:
+        output_for_normal(I, C, O)
