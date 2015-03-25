@@ -34,41 +34,54 @@ error_onon, gt_miss, win_size = parseconfigfile(configfile)
 #        print 'Its seq(including the genoytpe of all the contig):\n%s'%seq
         each_sm_seq_ls = []
         for ctg, idx in zip(contigs_ls, indexes_ls):
-            print '\tTackling %s contig...'%ctg
+            print '  Tackling %s contig...'%ctg
             idx_st = int(idx.split('-')[0])
             idx_ed = int(idx.split('-')[1])
             orig_seq = seq[idx_st:idx_ed] #str
             if len(orig_seq) >= win_size:
-#                print 'orig_seq:\n%s %s'%(orig_seq, len(orig_seq))
-                orig_seq_no_h = h2a_b(orig_seq, gt_zeze, gt_zeon, gt_onon,gt_miss)
-#                print 'orig_seq_no_h:\n%s %s'%(orig_seq_no_h,len(orig_seq_no_h))
-                windows_list = get_windows_list(orig_seq_no_h, win_size, gt_zeze,\
-gt_zeon, gt_onon)
-#                print 'windows_list:\n%s %s'%(windows_list, len(windows_list))
-                scores_list = get_scores_list(windows_list, win_size, gt_miss,\
-gt_zeze, gt_onon, gt_zeon)
-#                print 'scores_list:\n%s %s'%(scores_list, len(scores_list))
-                head_seq, main_seqlist, tail_seq = get_HTseq_Mseqlist\
-(orig_seq, windows_list,scores_list, win_size, gt_zeze, gt_zeon, gt_onon, gt_miss,\
-error_zeze,error_zeon, error_onon, po_type)
-#                print 'head_seq:\n%s %s'%(head_seq,len(head_seq))
-#                print 'tail_seq:\n%s %s'%(tail_seq,len(tail_seq))
-#                print 'main_seq:\n%s %s'%(''.join(main_seqlist),len(main_seqlist))
-                main_seq_first = get_Mseq_correct1(main_seqlist, orig_seq_no_h,\
-orig_seq, scores_list,gt_zeze, gt_zeon, gt_onon, gt_miss, win_size)
-#                print 'correct1_main_seq:\n%s %s'%(main_seq_first,len(main_seq_first))
-                main_seq_second = get_Mseq_correct2(main_seq_first,gt_zeon,\
-gt_zeze,gt_onon,gt_miss,orig_seq,win_size)
-#                print 'correct2_main_seq:\n%s %s'%(main_seq_second,len(main_seq_second))
-                final_seq = head_seq+main_seq_second+tail_seq
+                print '    the 1 round of correction...'
+                corrected_seq = get_corrected_seq(orig_seq,gt_zeze,gt_zeon,\
+gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
+                corrected_n = get_corrected_num(orig_seq, corrected_seq)
+#the maxium iterate num is 6 depending our simulation
+                round_n = 2
+                for iter in range(5):
+                    print '    the %s round of correction...'%round_n
+                    round_n += 1
+                    corrected_seq = get_corrected_seq(corrected_seq,gt_zeze,gt_zeon,\
+gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
+                    new_corrected_n = get_corrected_num(orig_seq, corrected_seq)
+                    if (new_corrected_n - corrected_n)/float(corrected_n) <= 0.01:
+                        break
+                    else:
+                        corrected_n = new_corrected_n
+                final_seq = corrected_seq
             if len(orig_seq) < win_size:
-#                print 'markers number of %s in % sample is too little,\
-#omitting...'%(ctg,sam)
+#                print 'markers number of %s in % sample is too little to \
+#correct, omitting...'%(ctg,sam)
                 final_seq = orig_seq
             each_sm_seq_ls.extend(list(final_seq))
         final_list_need_reverse.append(each_sm_seq_ls)
     return final_list_need_reverse, seqs_ls, first_line,\
     loci_ls,gt_zeze,gt_zeon,gt_onon
+
+def get_corrected_seq(orig_seq,gt_zeze,gt_zeon,gt_onon,gt_miss,\
+win_size,error_zeze,error_zeon,error_onon,po_type):
+    '''the corrected seq is str'''
+    orig_seq_no_h = h2a_b(orig_seq, gt_zeze, gt_zeon, gt_onon,gt_miss)
+    windows_list = get_windows_list(orig_seq_no_h, win_size, gt_zeze,\
+gt_zeon, gt_onon)
+    scores_list = get_scores_list(windows_list, win_size, gt_miss,\
+gt_zeze, gt_onon, gt_zeon)
+    head_seq, main_seqlist, tail_seq = get_HTseq_Mseqlist\
+(orig_seq, windows_list,scores_list, win_size, gt_zeze, gt_zeon, gt_onon, gt_miss,\
+error_zeze,error_zeon, error_onon, po_type)
+    main_seq_first = get_Mseq_correct1(main_seqlist, orig_seq_no_h,\
+orig_seq, scores_list,gt_zeze, gt_zeon, gt_onon, gt_miss, win_size)
+    main_seq_second = get_Mseq_correct2(main_seq_first,gt_zeon,\
+gt_zeze,gt_onon,gt_miss,orig_seq,win_size)
+    final_seq = head_seq+main_seq_second+tail_seq
+    return final_seq
 
 def parse_mapfile_infos(mapfile):
     '''parse mapfile then return: samples list, contigs list, indexes list,
@@ -548,6 +561,12 @@ def compare_and_mark(orig_seq, prefinal_seq):
 #    print 'final_seq_ls:\n%s'%final_seq_ls
     return final_seq_ls
 
+def get_corrected_num(orig_seq, corrected_seq):
+    n = 0
+    for i, j in zip(orig_seq, corrected_seq):
+        if i != j: n += 1
+    return n
+
 def output_for_check(mapfile, configfile, outputfile):
     '''the result contain star  so you can check the results'''
     corrected_ls, orig_ls, first_line, loci_ls = main(mapfile,configfile)[0:4]
@@ -562,6 +581,12 @@ def output_for_check(mapfile, configfile, outputfile):
         gpline = '\t'.join(gp)+'\n'
         f0.write(loc+'\t'+gpline)
     f0.close()
+#    f1 = open(outputfile, 'w')
+#    f1.write(first_line)
+#    for loc, gp in zip(loci_ls, reversed_ls):
+#        gpline = '\t'.join(gp)+'\n'
+#        f1.write(loc+'\t'+gpline)
+#    f1.close()
     print "All the samples have been corrected, please check the output file \
 '%s'."%outputfile
 
@@ -649,7 +674,7 @@ float(error_onon), gt_miss, int(win_size)
 if __name__ == "__main__":
     I = options.matrix_filename
     C = options.conf_filename
-    O = options.output_file
+    O = options.output_filename
     T = options.for_test
     if T:
         output_for_check(I, C, O)
