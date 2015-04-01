@@ -44,17 +44,20 @@ error_onon, gt_miss, win_size = parseconfigfile(configfile)
 gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
                 corrected_n = get_corrected_num(orig_seq, corrected_seq)
 #the maxium iterate num is 6 depending our simulation
-                round_n = 2
-                for iter in range(5):
-                    print '    the %s round of correction...'%round_n
-                    round_n += 1
-                    corrected_seq = get_corrected_seq(corrected_seq,gt_zeze,gt_zeon,\
+                if corrected_n == 0:
+                    pass
+                if corrected_n != 0:
+                    round_n = 2
+                    for iter in range(5):
+                        print '    the %s round of correction...'%round_n
+                        round_n += 1
+                        corrected_seq = get_corrected_seq(corrected_seq,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
-                    new_corrected_n = get_corrected_num(orig_seq, corrected_seq)
-                    if (new_corrected_n - corrected_n)/float(corrected_n) <= 0.01:
-                        break
-                    else:
-                        corrected_n = new_corrected_n
+                        new_corrected_n = get_corrected_num(orig_seq, corrected_seq)
+                        if (new_corrected_n - corrected_n)/float(corrected_n) <= 0.01:
+                            break
+                        else:
+                            corrected_n = new_corrected_n
                 final_seq = corrected_seq
             if len(orig_seq) < win_size:
 #                print 'markers number of %s in % sample is too little to \
