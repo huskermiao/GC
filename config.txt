@@ -1,5 +1,5 @@
 #choose your population type, F2 or RIL
-Population_type: F2
+Population_type: RIL
 
 #which letter you used to represent 0/0
 Letter_for_0/0: A
