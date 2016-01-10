@@ -578,7 +578,7 @@ def compare_and_mark(orig_seq, prefinal_seq):
     final_seq_ls = []
     for i, j in zip(orig_seq, prefinal_seq):
         if i == j:final_seq_ls.append(j)
-        if i != j:final_seq_ls.append(j+'*')
+        if i != j:final_seq_ls.append(j+'(%s)'%(i))
 #    print 'final_seq_ls:\n%s'%final_seq_ls
     return final_seq_ls
 
@@ -589,7 +589,7 @@ def get_corrected_num(orig_seq, corrected_seq):
     return n
 
 def output_for_check(mapfile, configfile, outputfile):
-    '''the result contain star  so you can check the results'''
+    '''the result contain star, so you can check the results'''
     corrected_ls, orig_ls, first_line, loci_ls = main(mapfile,configfile)[0:4]
     final_seq_list = []
     for cor, ori in zip(corrected_ls, orig_ls):
