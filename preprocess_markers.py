@@ -26,18 +26,19 @@ def bin_makers(mapfile, min_len, output_file, heteros_gt):
         fir_pos = int(first[0].split('-')[-1])
         sec_pos = int(second[0].split('-')[1])
         if fir_chr == sec_chr:
-            if sec_pos-fir_pos<=min_interval and (first[0] not in binnedPos) :
-                new_locus_name = fir.split()[0]+'-'+str(sec_pos)
-                new_gt = combine_gt(fir_gt, sec_gt, heteros_gt)
-                bin_line = new_locus_name + '\t' + new_gt + '\n'
-                gtMatrix.append(bin_line)
-                binnedPos.append(sec_chr+'-'+str(sec_pos)) # add marker bined to the pos set
-            elif sec_pos-fir_pos>min_interval and first[0] not in binnedPos :
-                gtMatrix.append(fir)
-            else:
-                pass
+            if first[0] not in binnedPos:
+                if sec_pos-fir_pos<=min_interval:
+                    new_locus_name = fir.split()[0]+'-'+str(sec_pos)
+                    new_gt = combine_gt(fir_gt, sec_gt, heteros_gt)
+                    bin_line = new_locus_name + '\t' + new_gt + '\n'
+                    gtMatrix.append(bin_line)
+                    binnedPos.append(second[0]) # add marker bined to the pos set
+                else: gtMatrix.append(fir)
+            else: pass
         else:
-            gtMatrix.append(fir)
+            if first[0] not in binnedPos: gtMatrix.append(fir)
+            else: pass
+
     last_line = second_flag[-1]
     if last_line.split()[0] not in binnedPos:
         gtMatrix.append(last_line)
@@ -52,7 +53,8 @@ def bin_makers(mapfile, min_len, output_file, heteros_gt):
         if N == 0:
             break
         cycle_n += 1
-    f2.writelines(gtMatrix)
+    new_Matrix = gen_binned_names(gtMatrix)
+    f2.writelines(new_Matrix)
 
 
 def cycle_bin(gtMatrix,min_interval, heteros_gt):
@@ -71,28 +73,22 @@ def cycle_bin(gtMatrix,min_interval, heteros_gt):
         fir_pos = int(first[0].split('-')[-1])
         sec_pos = int(second[0].split('-')[1])
         if fir_chr == sec_chr:
-            if sec_pos-fir_pos<=min_interval and (first[0] not in binned_Pos):
-                new_locus_name = \
-first[0]+'-'+'-'.join(second[0].split('-')[1:]) #(chr1-100-150) + (300-350)
-                new_gt = combine_gt(fir_gt, sec_gt, heteros_gt)
-                bin_line = new_locus_name + '\t' + new_gt + '\n'
-                Matrix_gt.append(bin_line)
-                binned_Pos.append(second[0]) # add marker bined to the pos list
-            elif sec_pos-fir_pos>min_interval and (first[0])not in binned_Pos:
-                Matrix_gt.append(fir)
-            else:
-                pass
+            if first[0] not in binned_Pos:
+                if sec_pos-fir_pos<=min_interval:
+                    new_locus_name = first[0]+'-'+'-'.join(second[0].split('-')[1:])
+                    new_gt = combine_gt(fir_gt, sec_gt, heteros_gt)
+                    bin_line = new_locus_name + '\t' + new_gt + '\n'
+                    Matrix_gt.append(bin_line)
+                    binned_Pos.append(second[0]) # add marker bined to the pos list
+                else: Matrix_gt.append(fir)
+            else: pass
         else:
-            Matrix_gt.append(fir)
+            if first[0] not in binned_Pos: Matrix_gt.append(fir)
+            else: pass
     last_line = second_flag[-1]
-    if last_line.split()[0] not in binned_Pos:
-        Matrix_gt.append(last_line)
+    if last_line.split()[0] not in binned_Pos: Matrix_gt.append(last_line)
     N2 = len(Matrix_gt)
-
     return N1-N2, Matrix_gt
-
-
-
 
 def combine_gt(gt_list1,gt_list2, heteros_gt):
     new_gt_ls = []
@@ -106,6 +102,27 @@ def combine_gt(gt_list1,gt_list2, heteros_gt):
             new_gt_ls.append(random.choice([i,j]))
 
     return '\t'.join(new_gt_ls)
+
+
+def gen_binned_names(gtMatrix):
+    f = open('binned_markers.txt', 'w')
+    new_Matrix = []
+    for i in gtMatrix:
+        j = i.split()[0].split('-')
+        if len(j) > 2:
+            GTs = '\t'.join(i.split()[1:])
+            newline = '%s-%s(%s)\t%s\n'%(j[0],j[1],len(j)-1,GTs)
+            new_Matrix.append(newline)
+            f.write('%s-%s(%s): %s\n'%(j[0],j[1],len(j)-1, i.split()[0]))
+        else:new_Matrix.append(i)
+    return new_Matrix
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     import sys
