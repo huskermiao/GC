@@ -65,7 +65,7 @@ gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
             pass
         if corrected_n != 0:
             round_n = 2
-            for iter in range(5):
+            for iter in range(7):
                 print '    the %s round of correction...'%round_n
                 round_n += 1
                 corrected_seq = get_corrected_seq(corrected_seq,gt_zeze,gt_zeon,\
@@ -475,22 +475,25 @@ def jud_inc_deg(h_socres):
     '''if single increase or single degrees, indicate this is not h island.
     otherwise this is h island'''
     score_series = h_socres.split()
-    series1 = score_series[:-1]
-    series2 = score_series[1:]
-    d = []
-    for i,j in zip(series1,series2):
-        d.append(float(j)-float(i))
-    bigger_zero = 0
-    smaller_zero = 0
-    equal_zero = 0
-    for i in d:
-        if i > 0: bigger_zero += 1
-        if i < 0: smaller_zero += 1
-        if i == 0: equal_zero += 1
-    if smaller_zero != 0 and bigger_zero != 0:
-        return True
+    if len(score_series) >= 3:
+        series1 = score_series[:-1]
+        series2 = score_series[1:]
+        d = []
+        for i,j in zip(series1,series2):
+            d.append(float(j)-float(i))
+        bigger_zero = 0
+        smaller_zero = 0
+        equal_zero = 0
+        for i in d:
+            if i > 0: bigger_zero += 1
+            if i < 0: smaller_zero += 1
+            if i == 0: equal_zero += 1
+        if smaller_zero != 0 and bigger_zero != 0:
+            return True
+        else:
+            return False
     else:
-        return False
+        return True
 
 def get_Mseq_correct2(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_size):
     '''get the second main seq which do the second correct step:
