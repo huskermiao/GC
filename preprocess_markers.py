@@ -111,9 +111,9 @@ def gen_binned_names(gtMatrix):
         j = i.split()[0].split('-')
         if len(j) > 2:
             GTs = '\t'.join(i.split()[1:])
-            newline = '%s-%s(%s)\t%s\n'%(j[0],j[1],len(j)-1,GTs)
+            newline = '%s-%s\t%s\n'%(j[0],j[1],GTs)
             new_Matrix.append(newline)
-            f.write('%s-%s(%s): %s\n'%(j[0],j[1],len(j)-1, i.split()[0]))
+            f.write('%s-%s: %s\n'%(j[0],j[1],i.split()[0]))
         else:new_Matrix.append(i)
     return new_Matrix
 
