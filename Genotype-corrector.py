@@ -488,10 +488,10 @@ def jud_inc_deg(h_socres):
             if i > 0: bigger_zero += 1
             if i < 0: smaller_zero += 1
             if i == 0: equal_zero += 1
-        if smaller_zero != 0 and bigger_zero != 0:
-            return True
-        else:
+        if bigger_zero==equal_zero==0 or smaller_zero==equal_zero==0:
             return False
+        else:
+            return True
     else:
         return True
 
