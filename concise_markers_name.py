@@ -10,7 +10,7 @@ def conciseName(mapfile,newfile):
         genotypes = '\t'.join(j[1:])
         pos = len(marker_name)
         if pos > 2:
-            newName = marker_name[0]+'-'+marker_name[-1]+'(%s)'%(pos-1)
+            newName = marker_name[0]+'-'+marker_name[1]+'-'+marker_name[-1]+'(%s)'%(pos-1)
         else:
             newName = j[0]
         newLines = newName+'\t'+genotypes

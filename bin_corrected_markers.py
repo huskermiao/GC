@@ -137,7 +137,7 @@ def combine_gt(gt_list1,gt_list2, heteros_gt):
     return '\t'.join(new_gt_ls)
 
 def gen_binned_names(gtMatrix):
-    f = open('corrected_bin.info', 'w')
+    f = open('bin.info', 'w')
     new_Matrix = []
     for i in gtMatrix:
         j = i.split()[0].split('-')

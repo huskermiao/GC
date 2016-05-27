@@ -1,17 +1,17 @@
 #choose your population type, F2 or RIL
-Population_type: RIL
+Population_type: F2
 
 #which letter you used to represent 0/0
 Letter_for_0/0: A
 
 #0/0 SNP error rate
-error_rate_for_0/0: 0.04
+error_rate_for_0/0: 0.03
 
 #which letter you used to represent 0/1
 Letter_for_0/1: X
 
 #0/1 SNP error rate
-error_rate_for_0/1: 0.03
+error_rate_for_0/1: 0.04
 
 #which letter you used to represent 1/1
 Letter_for_1/1: B

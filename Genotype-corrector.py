@@ -704,4 +704,5 @@ if __name__ == "__main__":
         output_for_check(I, C, O)
     elif I and C and O:
         output_for_normal(I, C, O)
-    print 'Add -h to show help.'
+    else:
+        print 'Add -h to show help.'
