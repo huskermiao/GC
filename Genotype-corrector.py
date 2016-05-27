@@ -77,7 +77,7 @@ gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
                     corrected_n = new_corrected_n
         final_seq = corrected_seq
     else:
-        print '%s omitting...'%(ctg)
+        print '%s: not have enough markers or too much missing data. Omitting...'%(ctg)
         final_seq = orig_seq
     return final_seq
 
@@ -288,7 +288,7 @@ gt_zeze, gt_zeon, gt_onon):
             Genotype = gt_zeon
         if b_ex_prob == max(a_ex_prob, h_ex_prob, b_ex_prob):
             Genotype = gt_onon
-#        print Genotype
+#        print 'Genotype: %s'%Genotype
         return Genotype
     else:
         print 'this tool just support RIL and F2 polulations now'
@@ -700,7 +700,8 @@ if __name__ == "__main__":
     C = options.conf_filename
     O = options.output_filename
     T = options.for_test
-    if T:
+    if I and C and O and T:
         output_for_check(I, C, O)
-    else:
+    elif I and C and O:
         output_for_normal(I, C, O)
+    print 'Add -h to show help.'

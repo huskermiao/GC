@@ -1,9 +1,33 @@
 #!/usr/lib/python
+#-*- coding:utf-8 -*-
+
 from  subprocess import call
 import random
-'''
-compress those makers that are very close into a single marker which is present!
-'''
+from optparse import OptionParser
+
+msg_usage = '''python %prog [options]
+example:
+python bin_corrected_markers.py -i input_file -m 2 -o output_file -l - -c X'''
+descr = '''DESCRIPTION: compress those very similar continuous makers into a single
+representative marker.'''
+optparser = OptionParser(usage = msg_usage, description = descr)
+optparser.add_option('-i', '--genotype-matrix', dest = 'matrix_filename',
+                     help = '''The genotype matrix file is tab delimited text
+containing each sample's marker in each position. For more
+detail about genotype matrix file please see our wiki page:
+(https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector).''')
+optparser.add_option('-m', '--min_mismatch', dest = 'minimum_mismatch',
+                     help = "The minimum mismatch between two continuous \n\
+                     markers for bin.")
+optparser.add_option('-o', '--output', dest = 'output_filename',
+                     help = 'Write the binned results to this file.')
+optparser.add_option('-l', '--miss_letter', dest = 'missing_data_letter',
+                     help = "missing date character in your genotype \n\
+                     matrix file. Usually is '-' or '.'.")
+optparser.add_option('-c', '--hetero_letter', dest ='heterozygous_genotype_letter',
+                     help = "Heterozygous genotype letter in your genotype \n\
+                     matrix file. Usually is 'h' or 'X'.")
+options, args = optparser.parse_args()
 def bin_makers(mapfile, min_miss_n, output_file, gt_miss, heteros_gt):
     print '1 cycle...'
     f1 = open(mapfile)
@@ -118,18 +142,22 @@ def gen_binned_names(gtMatrix):
     for i in gtMatrix:
         j = i.split()[0].split('-')
         if len(j) > 2:
+            markers_num = len(j)-1
             GTs = '\t'.join(i.split()[1:])
-            newline = '%s-%s\t%s\n'%(j[0],j[1],GTs)
+            newline = '%s-%s(%s)\t%s\n'%(j[0],j[1],markers_num,GTs)
             new_Matrix.append(newline)
-            f.write('%s-%s: %s\n'%(j[0],j[1],i.split()[0]))
+            f.write('%s-%s(%s): %s\n'%(j[0],j[1],markers_num,i.split()[0]))
         else:new_Matrix.append(i)
     return new_Matrix
 
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) == 6:
-        bin_makers(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],sys.argv[5])
+    I = options.matrix_filename
+    M = options.minimum_mismatch
+    O = options.output_filename
+    L = options.missing_data_letter
+    C = options.heterozygous_genotype_letter
+    if I and M and O and L and C:
+        bin_makers(I,M,O,L,C)
     else:
-        print 'usage:\npython bin_markers.py map_file min_missmatch_num \
-output_file miss_letter hetegt_letter'
+        print 'Add -h to show help.'

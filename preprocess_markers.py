@@ -1,9 +1,32 @@
 #!/usr/lib/python
+#-*- coding:utf-8 -*-
+
 from  subprocess import call
 import random
-'''
-compress those makers that are very close into a single marker which is present!
-'''
+from optparse import OptionParser
+
+msg_usage = '''python %prog [options]
+example:
+python preprocess_markers.py -i input_file -m 150 -o output_file -c X'''
+descr = '''DESCRIPTION: Remove continuous homozygous genotypes in heteryzygous
+region.'''
+
+optparser = OptionParser(usage = msg_usage, description = descr)
+optparser.add_option('-i', '--genotype-matrix', dest = 'matrix_filename',
+                     help = '''The genotype matrix file is tab delimited text
+containing each sample's marker in each position. For more detail about genotype
+matrix file please see our wiki page:
+(https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector).''')
+optparser.add_option('-m', '--min_length', dest = 'minimum_length',
+                     help = "The minimum length between two continuous \n\
+markers for preprocess. Usually is your read length.")
+optparser.add_option('-o', '--output', dest = 'output_filename',
+                     help = 'Write the preprocessed results to this file.')
+optparser.add_option('-c', '--hetero_gt', dest = 'heterozygous_genotype',
+                     help = "Heterozygous genotype letter in your genotype \n\
+matrix file. Usually is 'h' or 'X'.")
+options, args = optparser.parse_args()
+
 def bin_makers(mapfile, min_len, output_file, heteros_gt):
     print '1 cycle...'
     f1 = open(mapfile)
@@ -43,7 +66,7 @@ def bin_makers(mapfile, min_len, output_file, heteros_gt):
     if last_line.split()[0] not in binnedPos:
         gtMatrix.append(last_line)
     remainN = len(gtMatrix)
-    print '%s markers binned!'%len(binnedPos)
+    print '%s markers binned in this cycle!'%len(binnedPos)
 
     cycle_n = 2
     while True:
@@ -103,9 +126,8 @@ def combine_gt(gt_list1,gt_list2, heteros_gt):
 
     return '\t'.join(new_gt_ls)
 
-
 def gen_binned_names(gtMatrix):
-    f = open('preprocess_bin.info', 'w')
+    f = open('preprocess.info', 'w')
     new_Matrix = []
     for i in gtMatrix:
         j = i.split()[0].split('-')
@@ -118,15 +140,12 @@ def gen_binned_names(gtMatrix):
     return new_Matrix
 
 
-
-
-
-
-
-
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) == 5:
-        bin_makers(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    I = options.matrix_filename
+    M = options.minimum_length
+    O = options.output_filename
+    C = options.heterozygous_genotype
+    if I and M and O and C:
+        bin_makers(I,M,O,C)
     else:
-        print 'usage:\npython bin_markers.py map_file min_interval output_file hetegt_letter'
+        print 'Add -h to show help.'
