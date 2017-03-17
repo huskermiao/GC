@@ -1,7 +1,7 @@
 Overview of Genotype-corrector
 ================================
-Genotype-corrector is a useful tool to correct genotype calls from individuals with the goal
-to improve genetic mapping.It is based on a sliding window approach to correct noisy genotype 
+Genotype-corrector is a useful tool to correct genotype calls for individuals from RILs with the goal
+to improve genetic mapping.It is based on a sliding window approach to correct noisy genotype
 calls and complete missing data, which both have a significant impact on the reconstructed maps.
 Genotype-Corrector is useful for those who want to use SNPs genotype as the population
 markers to construct genetic mapping using next generation sequencing with relative
