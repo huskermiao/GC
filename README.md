@@ -1,4 +1,4 @@
-# Genotype-corrector
+# Overview of Genotype-corrector
 
 Author: Chenyong Miao([freemao](http://github.com/freemao)), Haibao Tang ([tanghaibao](http://github.com/tanghaibao))
 
@@ -6,7 +6,7 @@ Emial: <cmiao@huskers.unl.edu>
 
 License: BSD
 
-## Overview of Genotype-corrector
+## Description
 Genotype-corrector is a useful tool to correct genotype calls for individuals
 from RILs with the goal to improve genetic mapping.It is based on a sliding
 window approach to correct noisy genotype calls and complete missing data,
