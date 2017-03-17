@@ -15,8 +15,7 @@ is useful for those who want to use SNPs genotype as the population markers
 to construct genetic mapping using next generation sequencing with relative
 low sequence coverage.
 
-###The effective of Genotype-corrector
-
+## The effective of Genotype-corrector
 ![Comparison between before and after using Genotype-corrector](https://github.com/freemao/pics/blob/master/comparison.jpg)
 
 
