@@ -18,5 +18,5 @@ low sequence coverage.
 ## The effective of Genotype-corrector
 ![Comparison between before and after using Genotype-corrector](https://github.com/freemao/pics/blob/master/comparison.jpg)
 
-
+## Usage
 For detailed software usage, please see [Genotype-corrector wiki page](https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector).
