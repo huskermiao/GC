@@ -1,11 +1,8 @@
 # Genotype-corrector
 
-|||
-|---|---|
-| Author | Chenyong Miao ([freemao](http://github.com/freemao)) |
-|| Haibao Tang ([tanghaibao](http://github.com/tanghaibao)) |
-| Emial | <cmiao@huskers.unl.edu> |
-| License | BSD |
+Author: Chenyong Miao([freemao](http://github.com/freemao))
+        Haibao Tang ([tanghaibao](http://github.com/tanghaibao))
+Emial: <cmiao@huskers.unl.edu>
 
 ## Overview of Genotype-corrector
 
