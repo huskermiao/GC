@@ -4,7 +4,7 @@ Author: Chenyong Miao([freemao](http://github.com/freemao)), Haibao Tang ([tangh
 
 Emial: <cmiao@huskers.unl.edu>
 
-License: BSD
+License: [BSD](https://github.com/freemao/Genotype-corrector/blob/master/LICENSE)
 
 ## Description
 Genotype-corrector is a useful tool to correct genotype calls for individuals
