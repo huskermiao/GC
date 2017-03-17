@@ -1,10 +1,11 @@
 # Overview of Genotype-corrector
 
-Author: Chenyong Miao([freemao](http://github.com/freemao)), Haibao Tang ([tanghaibao](http://github.com/tanghaibao))
-
-Emial: <cmiao@huskers.unl.edu>
-
-License: [BSD](https://github.com/freemao/Genotype-corrector/blob/master/LICENSE)
+Author | Chenyong Miao([freemao](http://github.com/freemao))
+--- | ---
+ | Haibao Tang ([tanghaibao](http://github.com/tanghaibao))
+ | James Schnable ([jschnable](https://github.com/jschnable))
+Emial | <cmiao@huskers.unl.edu>
+License | [BSD](https://github.com/freemao/Genotype-corrector/blob/master/LICENSE)
 
 ## Description
 Genotype-corrector is a useful tool to correct genotype calls for individuals
