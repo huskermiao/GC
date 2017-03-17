@@ -11,6 +11,6 @@ low sequence coverage.
 :Email: cmiao@huskers.unl.edu.com
 :License: `BSD <http://creativecommons.org/licenses/BSD/>`_
 
-![Comparison before and after using Genotype-corrector (Cytoscape)](https://dl.dropboxusercontent.com/content_link/BkT0lkwkRTZk2RwAzeubS2goUCDvUIvieaGxNZQDI9vCf7f3vOES4aLLGXYLL9h5/file)
+![Comparison before and after using Genotype-corrector(Cytoscape)](https://www.dropbox.com/home/Github_Figures?preview=genetic_map_before_gc.png)
 
 For detailed software usage, please see `Genotype-corrector wiki page <https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector>`_.
