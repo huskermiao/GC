@@ -5,8 +5,8 @@ Author: Chenyong Miao([freemao](http://github.com/freemao)), Haibao Tang ([tangh
 Emial: <cmiao@huskers.unl.edu>
 
 License: BSD
-## Overview of Genotype-corrector
 
+## Overview of Genotype-corrector
 Genotype-corrector is a useful tool to correct genotype calls for individuals
 from RILs with the goal to improve genetic mapping.It is based on a sliding
 window approach to correct noisy genotype calls and complete missing data,
@@ -15,12 +15,9 @@ is useful for those who want to use SNPs genotype as the population markers
 to construct genetic mapping using next generation sequencing with relative
 low sequence coverage.
 
-###Before using Genotype-corrector
+###The effective of Genotype-corrector
 
-![Before using Genotype-corrector](https://github.com/freemao/pics/blob/master/genetic_map_before_gc.png)
+![Comparison between before and after using Genotype-corrector](https://github.com/freemao/pics/blob/master/comparison.jpg)
 
-###After using Genotype-corrector
-
-![After using Genotype-corrector](https://github.com/freemao/pics/blob/master/genetic_map_after_gc.png)
 
 For detailed software usage, please see [Genotype-corrector wiki page](https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector).
