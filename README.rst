@@ -8,7 +8,10 @@ markers to construct genetic mapping using next generation sequencing with relat
 low sequence coverage.
 
 :Author: Chenyong Miao (`freemao <http://github.com/freemao>`_)
-:Email: miaochenyong@163.com
+:Email: cmiao@huskers.unl.edu.com
 :License: `BSD <http://creativecommons.org/licenses/BSD/>`_
+
+Comparison before and after using Genotype-corrector:
+![Comparison before and after using Genotype-corrector](https://dl.dropboxusercontent.com/content_link/BkT0lkwkRTZk2RwAzeubS2goUCDvUIvieaGxNZQDI9vCf7f3vOES4aLLGXYLL9h5/file)
 
 For detailed software usage, please see `Genotype-corrector wiki page <https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector>`_.
