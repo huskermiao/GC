@@ -3,11 +3,11 @@ from optparse import OptionParser
 
 msg_usage = '''python %prog [options]
 example:
-python ChiSquare_test.py -i input -p F2 or RIL -d 1~10 -o output'''
+python ChiSquare_test.py -i input -p F2 or RIL -d 1~10 -a A -b B -c X -o output'''
 descr = '''DESCRIPTION: Filter phenotype frequencies using chisquare test
 with different levels of stringency. For F2 population, test A:B against the
 expected ration of 1:1. For RILs population, except for testing against 1:1, the
-heterizygous proportion should not exceed 50%.
+heterozygous proportion should not exceed 50%.
 '''
 
 optparser = OptionParser(usage = msg_usage, description = descr)
@@ -19,13 +19,13 @@ matrix file please see our wiki page:
 optparser.add_option('-p', '--population_type', dest = 'population',
                      help = "set the population type, F2 or RIL")
 optparser.add_option('-d', '--degree', dest = 'degree_level', default = 1,
-                     help = '''integer, 1 corresponds to the the pvalue of 1e-11(less strigenct)
-for chisquare test, 10 corresponds to 1e-2 (more strigent). Users can test
+                     help = '''integer, 1 corresponds to the the pvalue of 1e-11(least strigenct)
+for chisquare test, 10 corresponds to 1e-2 (most strigent). Users can test
 different degrees(1-10) to get a reseanable result''')
 optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'Write the filtered results to this file.')
 optparser.add_option('-a', '--homo1', dest = 'homozygous1', default = 'a',
-                     help = 'character for homozygous genotype.')
+                     help = 'character for reference homozygous genotype.')
 optparser.add_option('-b', '--homo2', dest = 'homozygous2', default = 'b',
                      help = 'character for alternative homozygous genotype.')
 optparser.add_option('-c', '--heter', dest = 'heterozygous', default = 'h',
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         Pvalue = float('1e%s'%(int(D)-12))
         print Pvalue
         if P == 'F2':
-            F2chitest(I,Pvalue, O, A, B, C )
+            F2chitest(I,Pvalue, O, A, B)
         elif P == 'RIL':
             RILchitest(I,Pvalue, O, A, B, C)
         else:
