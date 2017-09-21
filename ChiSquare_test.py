@@ -18,7 +18,7 @@ matrix file please see our wiki page:
 (https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector).''')
 optparser.add_option('-p', '--population_type', dest = 'population',
                      help = "set the population type, F2 or RIL")
-optparser.add_option('-d', '--degree', dest = 'degree_level', default = 1,
+optparser.add_option('-d', '--degree', dest = 'degree_level', default = 2,
                      help = '''integer, 1 corresponds to the the pvalue of 1e-11(least strigenct)
 for chisquare test, 10 corresponds to 1e-2 (most strigent). Users can test
 different degrees(1-10) to get a reseanable result''')
