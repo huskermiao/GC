@@ -23,4 +23,4 @@ error_rate_for_1/1: 0.01
 Character_for_missing_data: -
 
 #choose the size of the  sliding window
-Sliding_window_size :15
+Sliding_window_size :9
