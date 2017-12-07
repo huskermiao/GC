@@ -3,6 +3,8 @@
 
 from scipy import stats
 from optparse import OptionParser
+import ConfigParser
+import pandas as pd
 
 msg_usage = 'python %prog [options]'
 
@@ -23,8 +25,19 @@ options, args = optparser.parse_args()
 def main(mapfile, configfile):
     '''the mapfile can not contain any blank line
     win_size is int, >= will tackle, < not tackle'''
-    po_type, gt_zeze, error_zeze, gt_zeon, error_zeon, gt_onon,\
-error_onon, gt_miss, win_size = parseconfigfile(configfile)
+    # get values from config.txt
+    config = ConfigParser.ConfigParser()
+    cfgFn = config.read(configfile)[0]
+    po_type = config.get('Section1', 'Population_type')
+    gt_zeze = config.get('Section2', 'Letter_for_0/0')
+    gt_zeon = config.get('Section2', 'Letter_for_0/1')
+    gt_onon = config.get('Section2', 'Letter_for_1/1')
+    gt_miss = config.get('Section2', 'Character_for_missing_data')
+    error_zeze = config.getfloat('Section3', 'error_rate_for_0/0')
+    error_zeon = config.getfloat('Section3', 'error_rate_for_0/1')
+    error_onon = config.getfloat('Section3', 'error_rate_for_1/1')
+    win_size = config.getint('Section4', 'Sliding_window_size')
+
     samples_ls, contigs_ls, indexes_ls, first_line = parse_mapfile_infos(mapfile)
     seqs_ls, loci_ls = parse_mapfile_seqs(mapfile, gt_zeze, gt_zeon, gt_onon)
     final_list_need_reverse = []
@@ -662,7 +675,7 @@ If you use joinmap to construct genetic map, please loading to Joinmap by copyin
         f3.write(id+','+gpline)
     f3.close()
     print '\nThe csv file for R/qtl has been generated.'
-
+'''
 def parseconfigfile(config_file):
     f = open(config_file)
     namedict = {}
@@ -694,7 +707,7 @@ def parseconfigfile(config_file):
     win_size = namedict['Sliding_window_size']
     return po_type, gt_zeze, float(error_zeze), gt_zeon, float(error_zeon), gt_onon,\
 float(error_onon), gt_miss, int(win_size)
-
+'''
 if __name__ == "__main__":
     I = options.matrix_filename
     C = options.conf_filename
