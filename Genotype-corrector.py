@@ -4,25 +4,27 @@
 from scipy import stats
 from optparse import OptionParser
 import ConfigParser
-import pandas as pd
+#import pandas as pd
 
 msg_usage = 'python %prog [options]'
 
 descr = '''Improved genotype calls for genetic mapping.'''
 
-optparser = OptionParser(usage = msg_usage, description = descr)
+optparser = OptionParser(usage = msg_usage, description = descr, version='%prog 1.0')
 optparser.add_option('-m', '--genotype-matrix', dest = 'matrix_filename',
                      help = 'use this genotype matrix file as input')
 optparser.add_option('-c', '--configuration', dest = 'conf_filename',
                      help = 'loading parameters from this configuration file')
 optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'write the corrected results to this file')
-optparser.add_option('-t', '--test', action = 'store_true', dest = 'for_test',
-                     help = 'run the software under test')
+optparser.add_option('-l', '--contiglist', dest = 'contigs_filename',
+                     help = "(optional) names of contigs listed row by row in this file will be protected from correction")
+optparser.add_option('-t', '--test', action = 'store_true', dest = 'test',
+                     help = 'test mode. both original and corrected markers are shown in the results')
 options, args = optparser.parse_args()
 
 
-def main(mapfile, configfile):
+def main(mapfile, configfile, Ls=[]):
     '''the mapfile can not contain any blank line
     win_size is int, >= will tackle, < not tackle'''
     # get values from config.txt
@@ -46,22 +48,26 @@ def main(mapfile, configfile):
 #        print 'Its seq(including the genoytpe of all the contig):\n%s'%seq
         each_sm_seq_ls = []
         for ctg, idx in zip(contigs_ls, indexes_ls):
-            print '  Tackling %s contig...'%ctg
             idx_st = int(idx.split('-')[0])
             idx_ed = int(idx.split('-')[1])
             orig_seq = seq[idx_st:idx_ed] #str
-            miss_rate = cal_miss_rate(orig_seq, gt_miss)
-            if po_type == 'F2':
-                final_seq = do_correct(orig_seq,win_size,miss_rate,0.4,gt_zeze,gt_zeon,\
+            print '  Tackling %s contig...'%ctg
+            if ctg not in Ls:
+                miss_rate = cal_miss_rate(orig_seq, gt_miss)
+                if po_type == 'F2':
+                    final_seq = do_correct(orig_seq,win_size,miss_rate,0.4,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,error_zeze,error_zeon,error_onon,po_type,ctg)
-                each_sm_seq_ls.extend(list(final_seq))
-            elif po_type == 'RIL':
-                final_seq = do_correct(orig_seq,win_size,miss_rate,0.5,gt_zeze,gt_zeon,\
+                    each_sm_seq_ls.extend(list(final_seq))
+                elif po_type == 'RIL':
+                    final_seq = do_correct(orig_seq,win_size,miss_rate,0.5,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,error_zeze,error_zeon,error_onon,po_type,ctg)
-                each_sm_seq_ls.extend(list(final_seq))
-            else:
-                raise ValueError("confirm your population type: '%s', this software only support\
+                    each_sm_seq_ls.extend(list(final_seq))
+                else:
+                    raise ValueError("confirm your population type: '%s', this software only support\
  'F2' and 'RIL' now"%po_type)
+            else:
+                print '  omit...'
+                each_sm_seq_ls.extend(list(orig_seq))
         final_list_need_reverse.append(each_sm_seq_ls)
     return final_list_need_reverse, seqs_ls, first_line,\
 loci_ls,gt_zeze,gt_zeon,gt_onon
@@ -123,8 +129,7 @@ def parse_mapfile_infos(mapfile):
     f0 = open(mapfile)
     first_line = f0.readline()
     samples_list = first_line.split()[1:]
-    contigs_list, indexes_list = [], []
-    tmp_index = []
+    contigs_list, indexes_list, tmp_index = [], [], []
     for i, j in enumerate(f0):
         k = j.split()
 #need change depend on the input format
@@ -604,9 +609,9 @@ def get_corrected_num(orig_seq, corrected_seq):
         if i != j: n += 1
     return n
 
-def output_for_check(mapfile, configfile, outputfile):
+def output_for_check(mapfile, configfile, outputfile, Ls=[]):
     '''the result contain star, so you can check the results'''
-    corrected_ls, orig_ls, first_line, loci_ls = main(mapfile,configfile)[0:4]
+    corrected_ls, orig_ls, first_line, loci_ls = main(mapfile,configfile, Ls)[0:4]
     final_seq_list = []
     for cor, ori in zip(corrected_ls, orig_ls):
         new_ls = compare_and_mark(ori, cor)
@@ -627,9 +632,9 @@ def output_for_check(mapfile, configfile, outputfile):
     print "All the samples have been corrected, please check the output file \
 '%s'."%outputfile
 
-def output_for_normal(mapfile, configfile, outputfile):
+def output_for_normal(mapfile, configfile, outputfile, Ls=[]):
     '''the result not contain star...'''
-    corrected_ls, useless, first_line, loci_ls, gt_zeze,gt_zeon,gt_onon = main(mapfile,configfile)
+    corrected_ls, useless, first_line, loci_ls, gt_zeze,gt_zeon,gt_onon = main(mapfile,configfile, Ls)
     reversed_ls = map(list, zip(*corrected_ls))
     f0 = open(outputfile, 'w')
     f0.write(first_line)
@@ -675,47 +680,26 @@ If you use joinmap to construct genetic map, please loading to Joinmap by copyin
         f3.write(id+','+gpline)
     f3.close()
     print '\nThe csv file for R/qtl has been generated.'
-'''
-def parseconfigfile(config_file):
-    f = open(config_file)
-    namedict = {}
-    for i in f:
-        if i.startswith('#'):pass
-        else:
-            if i.split(): #judge is blank line or not
-                j = i.strip().split(':')
-                namedict[j[0].strip()]=j[1].strip()
-    print 'Your parameters in configuration file:'
-    print '\tPopulation type: %s'%namedict['Population_type']
-    print '\tLetter for 0/0: %s'%namedict['Letter_for_0/0']
-    print '\tLetter for 0/1: %s'%namedict['Letter_for_0/1']
-    print '\tLetter for 1/1: %s'%namedict['Letter_for_1/1']
-    print '\tCharacter for missing data: \
-%s'%namedict['Character_for_missing_data']
-    print '\tSliding window size: %s'%namedict['Sliding_window_size']
-    po_type = namedict['Population_type']
-    gt_zeze = namedict['Letter_for_0/0']
-    error_zeze = namedict['error_rate_for_0/0']
-    print '\tSNP error rate for 0/0: %s'%error_zeze
-    gt_zeon = namedict['Letter_for_0/1']
-    error_zeon = namedict['error_rate_for_0/1']
-    print '\tSNP error rate for 0/1: %s'%error_zeon
-    gt_onon = namedict['Letter_for_1/1']
-    error_onon = namedict['error_rate_for_1/1']
-    print '\tSNP error rate for 1/1: %s\n'%error_onon
-    gt_miss = namedict['Character_for_missing_data']
-    win_size = namedict['Sliding_window_size']
-    return po_type, gt_zeze, float(error_zeze), gt_zeon, float(error_zeon), gt_onon,\
-float(error_onon), gt_miss, int(win_size)
-'''
+
 if __name__ == "__main__":
     I = options.matrix_filename
     C = options.conf_filename
     O = options.output_filename
-    T = options.for_test
-    if I and C and O and T:
-        output_for_check(I, C, O)
-    elif I and C and O:
-        output_for_normal(I, C, O)
+    L = options.contigs_filename
+    T = options.test
+    if L:
+        f = open(L)
+        ConLs = [i.strip() for i in f]
+        if I and C and O and T:
+            output_for_check(I, C, O, Ls=ConLs)
+        elif I and C and O:
+            output_for_normal(I, C, O, Ls=ConLs)
+        else:
+            print 'Add -h to show help.'
     else:
-        print 'Add -h to show help.'
+        if I and C and O and T:
+            output_for_check(I, C, O)
+        elif I and C and O:
+            output_for_normal(I, C, O)
+        else:
+            print 'Add -h to show help.'
