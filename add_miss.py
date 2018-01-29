@@ -55,8 +55,16 @@ if __name__ == "__main__":
     if len(sys.argv) == 4:
         addmiss(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
-        print 'usage: python add_miss.py map_file miss_rate output_file'
+        print '''usage: python add_miss.py map_file miss_rate output_file
+This script only used for testing the performance of GC under different missing data. 
+ 
+map_file, the simulated map file without any error genotypes and missing data
+miss_rate, how many missing data you want to introduce to your simulated genotype data. 
+output_file, the output map file. 
 
+example:
+python add_miss.py original.map 0.5 missing_0.5.map
+'''
 
 
 

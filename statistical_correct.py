@@ -1,6 +1,6 @@
 #!/usr/lib/python
 
-def tongji(original,precorrect,corrected):
+def stat(original,precorrect,corrected):
     f1 = open(original)
     f2 = open(precorrect)
     f3 = open(corrected)
@@ -66,7 +66,16 @@ def tongji(original,precorrect,corrected):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) == 4:
-        tongji(sys.argv[1],sys.argv[2],sys.argv[3])
+        stat(sys.argv[1],sys.argv[2],sys.argv[3])
     else:
-        print 'usage:\npython statistical_correct.py original precorrect \
-corrected'
+        print '''usage:\npython statistical_correct.py original.map precorrect.map corrected.map
+
+The script only used for testing to compute the true positive rate, true negative rate, and accuracy. 
+
+original.map: the original map file without any missing data and wrong genotypes
+precorrect.map: the map file was artificially introduced the missing and wrong genotypes.
+corrected.map: the corrected map file by GenotypeCorrector
+'''
+
+
+
