@@ -5,7 +5,7 @@ import vcf
 from optparse import OptionParser
 
 msg_usage = 'usage: %prog [-I] vcf [-O] map file name'
-descr ='''transfer vcf file into map file used in GenotypeCorrector.'''
+descr ='''convert vcf file to map format file used in GenotypeCorrector. To use this script, the vcf package need to be installed. The genotypes 0/0, 0/1, 1/1 will be converted to A, X, B in map file. Misisng genotypes are presented as - in map file.'''
 optparser = OptionParser(usage = msg_usage, description = descr)
 optparser.add_option('-I', '--input', dest = 'vcffile',
                       help = 'input your vcf file')
