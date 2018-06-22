@@ -7,7 +7,7 @@ from optparse import OptionParser
 
 msg_usage = '''python %prog [options]
 example:
-python bin_corrected_markers.py -i input_file -m 2 -o output_file -l - -c X'''
+python bin_corrected_markers.py -i input_file -m 2 -o output_file'''
 descr = '''DESCRIPTION: compress those very similar continuous makers into a single
 representative marker.'''
 optparser = OptionParser(usage = msg_usage, description = descr)
@@ -21,10 +21,10 @@ optparser.add_option('-m', '--min_mismatch', dest = 'minimum_mismatch',
                      markers for bin.")
 optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'Write the binned results to this file.')
-optparser.add_option('-l', '--miss_letter', dest = 'missing_data_letter',
+optparser.add_option('-l', '--miss_letter', dest = 'missing_data_letter',default='-',
                      help = "missing date character in your genotype \n\
                      matrix file. Usually is '-' or '.'.")
-optparser.add_option('-c', '--hetero_letter', dest ='heterozygous_genotype_letter',
+optparser.add_option('-c', '--hetero_letter', dest ='heterozygous_genotype_letter',default='X',
                      help = "Heterozygous genotype letter in your genotype \n\
                      matrix file. Usually is 'h' or 'X'.")
 options, args = optparser.parse_args()
