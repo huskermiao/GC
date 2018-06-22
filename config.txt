@@ -3,28 +3,25 @@
 Population_type: F2
 
 [Section2]
-#which letter you used to represent 0/0
-Letter_for_0/0: A
+#the character used for homozygous genotype
+Letter_for_homo1: A
 
-#which letter you used to represent 0/1
-Letter_for_0/1: X
+#the character used for heterozygous genotype
+Letter_for_hete: X
 
-#which letter you used to represent 1/1
-Letter_for_1/1: B
+#the character used for alternative homozygous genotype
+Letter_for_homo2: B
 
-#which character you used to represent missing data
-Character_for_missing_data: -
+#the character used to represent missing genotype calls
+Letter_for_missing_data: -
 
 [Section3]
-#0/0 SNP error rate
-error_rate_for_0/0: 0.03
+#genotype error rate of homo1
+error_rate_for_homo1: 0.03
 
-#0/1 SNP error rate
-error_rate_for_0/1: 0.04
-
-#1/1 SNP error rate
-error_rate_for_1/1: 0.01
+#genotype error rate of homo2
+error_rate_for_homo2: 0.01
 
 [Section4]
-#choose the size of the sliding window (odd numbers)
+#choose the size of the sliding window (must be odd numbers)
 Sliding_window_size :15

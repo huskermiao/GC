@@ -7,7 +7,7 @@ python ChiSquare_test.py -i input -p F2 or RIL -d 1~10 -a A -b B -c X -o output'
 descr = '''DESCRIPTION: Filter phenotype frequencies using chisquare test
 with different levels of stringency. For F2 population, test A:B against the
 expected ration of 1:1. For RILs population, except for testing against 1:1, the
-heterozygous proportion should not exceed 50%.
+heterozygous proportion exceeding 50% will also be removed.
 '''
 
 optparser = OptionParser(usage = msg_usage, description = descr)
@@ -24,11 +24,11 @@ for chisquare test, 10 corresponds to 1e-2 (most strigent). Users can test
 different degrees(1-10) to get a reseanable result''')
 optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'Write the filtered results to this file.')
-optparser.add_option('-a', '--homo1', dest = 'homozygous1', default = 'a',
+optparser.add_option('-a', '--homo1', dest = 'homozygous1', default = 'A',
                      help = 'character for reference homozygous genotype.')
-optparser.add_option('-b', '--homo2', dest = 'homozygous2', default = 'b',
+optparser.add_option('-b', '--homo2', dest = 'homozygous2', default = 'B',
                      help = 'character for alternative homozygous genotype.')
-optparser.add_option('-c', '--heter', dest = 'heterozygous', default = 'h',
+optparser.add_option('-c', '--heter', dest = 'heterozygous', default = 'X',
                      help = 'character for heterozygous genotype.')
 options, args = optparser.parse_args()
 

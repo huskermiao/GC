@@ -22,9 +22,9 @@ optparser.add_option('-m', '--min_length', dest = 'minimum_length',
 markers for preprocess. Usually is your read length.")
 optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'Write the preprocessed results to this file.')
-optparser.add_option('-c', '--hetero_gt', dest = 'heterozygous_genotype',
+optparser.add_option('-c', '--hetero_gt', dest = 'heterozygous_genotype', default = 'X',
                      help = "Heterozygous genotype letter in your genotype \n\
-matrix file. Usually is 'h' or 'X'.")
+matrix file. Default is 'X'.")
 options, args = optparser.parse_args()
 
 def bin_makers(mapfile, min_len, output_file, heteros_gt):
