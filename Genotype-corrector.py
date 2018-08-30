@@ -44,14 +44,14 @@ def main(mapfile, configfile, Ls=[]):
     seqs_ls, loci_ls = parse_mapfile_seqs(mapfile, gt_zeze, gt_zeon, gt_onon)
     final_list_need_reverse = []
     for sam, seq in zip(samples_ls, seqs_ls):
-        print '\nTackling sample: %s'%sam
+        print('\nTackling sample: %s'%sam)
 #        print 'Its seq(including the genoytpe of all the contig):\n%s'%seq
         each_sm_seq_ls = []
         for ctg, idx in zip(contigs_ls, indexes_ls):
             idx_st = int(idx.split('-')[0])
             idx_ed = int(idx.split('-')[1])
             orig_seq = seq[idx_st:idx_ed] #str
-            print '  Tackling %s contig...'%ctg
+            print('  Tackling %s contig...'%ctg)
             if ctg not in Ls:
                 miss_rate = cal_miss_rate(orig_seq, gt_miss)
                 if po_type == 'F2':
@@ -66,7 +66,7 @@ gt_onon,gt_miss,error_zeze,error_zeon,error_onon,po_type,ctg)
                     raise ValueError("confirm your population type: '%s', this software only support\
  'F2' and 'RIL' now"%po_type)
             else:
-                print '  omit...'
+                print('  omit...')
                 each_sm_seq_ls.extend(list(orig_seq))
         final_list_need_reverse.append(each_sm_seq_ls)
     return final_list_need_reverse, seqs_ls, first_line,\
@@ -75,7 +75,7 @@ loci_ls,gt_zeze,gt_zeon,gt_onon
 def do_correct(orig_seq,win_size,miss_rate,min_missingrate,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,error_zeze,error_zeon,error_onon,po_type,ctg):
     if len(orig_seq) >= win_size and miss_rate <= min_missingrate:
-        print '    the 1 round of correction...'
+        print('    the 1 round of correction...')
         corrected_seq = get_corrected_seq(orig_seq,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
         corrected_n = get_corrected_num(orig_seq, corrected_seq)
@@ -85,7 +85,7 @@ gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
         if corrected_n != 0:
             round_n = 2
             for iter in range(7):
-                print '    the %s round of correction...'%round_n
+                print('    the %s round of correction...'%round_n)
                 round_n += 1
                 corrected_seq = get_corrected_seq(corrected_seq,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
@@ -96,7 +96,7 @@ gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
                     corrected_n = new_corrected_n
         final_seq = corrected_seq
     else:
-        print '%s: not have enough markers or too much missing data. Omitting...'%(ctg)
+        print('%s: not have enough markers or too much missing data. Omitting...'%(ctg))
         final_seq = orig_seq
     return final_seq
 
@@ -141,10 +141,10 @@ def parse_mapfile_infos(mapfile):
     f0.close()
     for i, j in zip(tmp_index[0:-1], tmp_index[1:]):
         indexes_list.append(str(i)+'-'+str(j))
-    print 'There are total %s samples:\n\t%s\n'\
-%(len(samples_list),','.join(samples_list))
-    print 'There are total %s contigs:\n\t%s\n'\
-%(len(contigs_list),','.join(contigs_list))
+    print('There are total %s samples:\n\t%s\n'
+%(len(samples_list),','.join(samples_list)))
+    print('There are total %s contigs:\n\t%s\n'\
+%(len(contigs_list),','.join(contigs_list)))
     return samples_list, contigs_list, indexes_list, first_line
 
 def parse_mapfile_seqs(mapfile, gt_zeze, gt_zeon, gt_onon):
@@ -309,7 +309,7 @@ gt_zeze, gt_zeon, gt_onon):
 #        print 'Genotype: %s'%Genotype
         return Genotype
     else:
-        print 'this tool just support RIL and F2 polulations now'
+        print('this tool just support RIL and F2 polulations now')
 
 def get_Mseq_correct1(main_seqlist, orig_seq_no_h, orig_seq, scores_list,\
 gt_zeze, gt_zeon, gt_onon,gt_miss, win_size):
@@ -629,8 +629,8 @@ def output_for_check(mapfile, configfile, outputfile, Ls=[]):
 #        gpline = '\t'.join(gp)+'\n'
 #        f1.write(loc+'\t'+gpline)
 #    f1.close()
-    print "All the samples have been corrected, please check the output file \
-'%s'."%outputfile
+    print("All the samples have been corrected, please check the output file \
+'%s'."%outputfile)
 
 def output_for_normal(mapfile, configfile, outputfile, Ls=[]):
     '''the result not contain star...'''
@@ -655,8 +655,8 @@ number_of_loci <para11>\nnumber_of_individual <para12>\n\n'
         gpline = '\t'.join(gp)+'\n'
         f1.write(loc+'\t'+gpline)
     f1.close()
-    print '\nThe file for MSTMap has been generated.\n\
-If you use MSTMap to construct genetic map, please add your own MSTMap parameters in the file.'
+    print('\nThe file for MSTMap has been generated.\n\
+If you use MSTMap to construct genetic map, please add your own MSTMap parameters in the file.')
     f2 = open(outputfile+'.joinmap', 'w')
     fir_ls = first_line.split()
     new_firline = fir_ls[0]+'\t'+'Classification\t'+'\t'.join(fir_ls[1:])+'\n'
@@ -667,8 +667,8 @@ If you use MSTMap to construct genetic map, please add your own MSTMap parameter
         gpline = '\t'.join(gp)+'\n'
         f2.write(loc+'\t'+cl+'\t'+gpline)
     f2.close()
-    print '\nThe file for Joinmap has been generated.\n\
-If you use joinmap to construct genetic map, please loading to Joinmap by copying and pasting from Excel.'
+    print('\nThe file for Joinmap has been generated.\n\
+If you use joinmap to construct genetic map, please loading to Joinmap by copying and pasting from Excel.')
     f3 = open(outputfile+'.rqtl.csv','w')
     new_firstline = 'id,'+','.join(loci_ls)+'\n'
     second_line = ',1'*lines+'\n'
@@ -679,7 +679,7 @@ If you use joinmap to construct genetic map, please loading to Joinmap by copyin
         gpline = ','.join(gp)+'\n'
         f3.write(id+','+gpline)
     f3.close()
-    print '\nThe csv file for R/qtl has been generated.'
+    print('\nThe csv file for R/qtl has been generated.')
 
 if __name__ == "__main__":
     I = options.matrix_filename
@@ -695,11 +695,11 @@ if __name__ == "__main__":
         elif I and C and O:
             output_for_normal(I, C, O, Ls=ConLs)
         else:
-            print 'Add -h to show help.'
+            print('Add -h to show help.')
     else:
         if I and C and O and T:
             output_for_check(I, C, O)
         elif I and C and O:
             output_for_normal(I, C, O)
         else:
-            print 'Add -h to show help.'
+            print('Add -h to show help.')
