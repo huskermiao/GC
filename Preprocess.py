@@ -205,7 +205,7 @@ def CStest(args):
     %prog CStest genotype_matrix_input genotype_matrix_output
 
       genotype_matrix_input: specify the input genotype matrix file. 
-        Check the manual to maker sure the format is correct:
+        Check the manual to make sure the format is correct:
         (https://github.com/freemao/Genotype-corrector/wiki/Genotype-Corrector).
 
       genotype_matrix_output: specify the output file name after filteration.
@@ -220,8 +220,8 @@ def CStest(args):
         help = 'specify the population stype.')
     p.add_option('--degree', default = '3', choices=('1','2','3','4','5'),
         help = """set the chi square test cutoff strigency.
-1 most strigent(will remove more markers). 4 least strigent(remove less markers).
-Users can choose the proper degree for your own data by checking how many markers left by testing different levels.""")
+1: most strigent(will get rid of more markers). 5: least strigent(get ride of less markers).
+You can choose the proper degree level by checking how many markers left under different degree levels.""")
     opts, args = p.parse_args(args)
     if len(args) == 0:
         sys.exit(not p.print_help())
@@ -233,7 +233,7 @@ Users can choose the proper degree for your own data by checking how many marker
     ratio_dict = {'F2':(1,1), 'RIL':(1,1), 'BCFn':(3,1)}
     r1, r2 = ratio_dict[opts.population]
     
-    df0_chr, chr_order = getChunk(matrix_in) 
+    chr_order, df0_chr = getChunk(matrix_in) 
     reader = pd.read_csv(matrix_in, delim_whitespace=True, index_col=0,  iterator=True)
     Filtered = []
     for chrom in chr_order:
@@ -249,7 +249,12 @@ Users can choose the proper degree for your own data by checking how many marker
         cond_min5 = (obs_homo1>5) & (obs_homo2>5)
         observe_homo1, observe_homo2 = obs_homo1[cond_min5], obs_homo2[cond_min5]
         observe_total = observe_homo1 + observe_homo2
-        expect_homo1, expect_homo2 = observe_total * 0.75, observe_total * 0.25
+        if opts.population == 'BCFn':
+            expect_homo1, expect_homo2 = observe_total * 0.75, observe_total * 0.25
+        elif opts.population == 'F2':
+            expect_homo1, expect_homo2 = observe_total * 0.5, observe_total * 0.5
+        elif opts.population == 'RIL':
+            expect_homo1, expect_homo2 = observe_total * 0.5, observe_total * 0.5
         chi_value, p_value = chi([observe_homo1, observe_homo2], [expect_homo1, expect_homo2])
         df_tmp2 = pd.DataFrame(dict(zip(['ob_1', 'ob_2', 'chi', 'p'], [observe_homo1, observe_homo2, chi_value, p_value])))
         cond_pvalue = df_tmp2['p'] > cutoff

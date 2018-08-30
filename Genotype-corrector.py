@@ -3,7 +3,10 @@
 
 from scipy import stats
 from optparse import OptionParser
-import ConfigParser
+try: 
+    from ConfigParser import ConfigParser
+except ModuleNotFoundError:
+    from configparser import ConfigParser
 #import pandas as pd
 
 msg_usage = 'python %prog [options]'
@@ -18,7 +21,7 @@ optparser.add_option('-c', '--configuration', dest = 'conf_filename',
 optparser.add_option('-o', '--output', dest = 'output_filename',
                      help = 'write the corrected results to this file')
 optparser.add_option('-l', '--contiglist', dest = 'contigs_filename',
-                     help = "(optional) names of contigs listed row by row in this file will be protected from correction")
+                     help = "(optional) specify the file including chromosome names listed row by row which will be protected from correction")
 optparser.add_option('-t', '--test', action = 'store_true', dest = 'test',
                      help = 'test mode. both original and corrected markers are shown in the results')
 options, args = optparser.parse_args()
@@ -28,7 +31,7 @@ def main(mapfile, configfile, Ls=[]):
     '''the mapfile can not contain any blank line
     win_size is int, >= will tackle, < not tackle'''
     # get values from config.txt
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser()
     cfgFn = config.read(configfile)[0]
     po_type = config.get('Section1', 'Population_type')
     gt_zeze = config.get('Section2', 'Letter_for_homo1')
@@ -44,14 +47,14 @@ def main(mapfile, configfile, Ls=[]):
     seqs_ls, loci_ls = parse_mapfile_seqs(mapfile, gt_zeze, gt_zeon, gt_onon)
     final_list_need_reverse = []
     for sam, seq in zip(samples_ls, seqs_ls):
-        print('\nTackling sample: %s'%sam)
+        print('\nHandling sample: %s'%sam)
 #        print 'Its seq(including the genoytpe of all the contig):\n%s'%seq
         each_sm_seq_ls = []
         for ctg, idx in zip(contigs_ls, indexes_ls):
             idx_st = int(idx.split('-')[0])
             idx_ed = int(idx.split('-')[1])
             orig_seq = seq[idx_st:idx_ed] #str
-            print('  Tackling %s contig...'%ctg)
+            print('  Start correction on contig %s...'%ctg)
             if ctg not in Ls:
                 miss_rate = cal_miss_rate(orig_seq, gt_miss)
                 if po_type == 'F2':
@@ -75,7 +78,7 @@ loci_ls,gt_zeze,gt_zeon,gt_onon
 def do_correct(orig_seq,win_size,miss_rate,min_missingrate,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,error_zeze,error_zeon,error_onon,po_type,ctg):
     if len(orig_seq) >= win_size and miss_rate <= min_missingrate:
-        print('    the 1 round of correction...')
+        print('    performing the 1st round of correction...')
         corrected_seq = get_corrected_seq(orig_seq,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
         corrected_n = get_corrected_num(orig_seq, corrected_seq)
@@ -85,7 +88,7 @@ gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
         if corrected_n != 0:
             round_n = 2
             for iter in range(7):
-                print('    the %s round of correction...'%round_n)
+                print('    performing the correction round %s...'%round_n)
                 round_n += 1
                 corrected_seq = get_corrected_seq(corrected_seq,gt_zeze,gt_zeon,\
 gt_onon,gt_miss,win_size,error_zeze,error_zeon,error_onon,po_type)
@@ -230,8 +233,9 @@ def get_scores_list(windows_list, win_size, gt_miss, gt_zeze, gt_onon, gt_zeon):
 def get_HTseq_Mseqlist(orig_seq,windows_list, scores_list, win_size, gt_zeze,
 gt_zeon,gt_onon,gt_miss,error_zeze, error_zeon, error_onon, po_type):
     '''H, T, M means head, tail, main'''
-    middle_index = (win_size-1)/2
-    miss_count_cutoff = (win_size+1)/2
+    middle_index = (win_size-1)//2
+    miss_count_cutoff = (win_size+1)//2
+    print(orig_seq)
     main_orig_seq = orig_seq[middle_index:-middle_index]
 #    print 'main_orig_seq:\n%s %s'%(main_orig_seq,len(main_orig_seq))
     main_seq_ls = []
@@ -322,7 +326,7 @@ gt_zeze, gt_zeon, gt_onon,gt_miss, win_size):
     correct: hhhhhhhhhhhh'''
     h_island_list, h_island_idx, h_island_score = get_h_islands_info\
 (main_seqlist,gt_zeon, gt_zeze, gt_onon, gt_miss,scores_list)
-    middle_index = (win_size-1)/2
+    middle_index = (win_size-1)//2
     for i,n in zip(h_island_idx,h_island_score):
         j = [int(k) for k in i.split()]
 #        print 'j: %s'%j
@@ -399,7 +403,7 @@ j[0]+middle_index+middle_index]
                     main_seqlist[j[-1]-t_need_n+1:j[-1]+1] = [i for i in \
 t_diff_ls[::-1]]
             if len(j) < win_size: # bigger than middle_index
-                correct_frame = len(j)/2
+                correct_frame = len(j)//2
                 befo_head = orig_seq[j[0]+correct_frame:\
 j[0]+correct_frame+correct_frame]
 #               print 'befo_head: %s'%befo_head
@@ -522,7 +526,7 @@ def get_Mseq_correct2(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss,orig_seq,win_siz
     orig:      hhhhhhhhhhh
     corrected: hhhhhhhhaaa'''
     h_island_ls, h_idx_island = get_h_islands_info_noscores(main_seq1,gt_zeon,gt_zeze,gt_onon,gt_miss)
-    middle_index = (win_size-1)/2
+    middle_index = (win_size-1)//2
     main_seqls = [i for i in main_seq1]
     orig_seq_truncted = orig_seq[middle_index:-middle_index]
 #    print 'main_seqls:\n %s %s'%(''.join(main_seqls), len(main_seqls))
