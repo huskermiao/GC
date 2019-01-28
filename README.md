@@ -7,5 +7,4 @@
 |**Emial** | <cmiao@huskers.unl.edu>
 |**License** | [BSD](https://github.com/freemao/Genotype-corrector/blob/master/LICENSE)
 
-## Usage
-This project has been moved to [schnalelab](https://github.com/freemao/schnablelab/wiki/GC) library. Check the new [wiki](https://github.com/freemao/schnablelab/wiki/GC) page for details.
+## This project has been moved to the [schnalelab](https://github.com/freemao/schnablelab/wiki/GC) library. Check the new [wiki](https://github.com/freemao/schnablelab/wiki/GC) page for details.
